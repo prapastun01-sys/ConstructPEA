@@ -102,75 +102,75 @@
         <!-- Header -->
         <header class="bg-white shadow-md p-4 sticky top-0 z-40">
             <div class="container mx-auto flex justify-between items-center">
-                <div class="flex items-center gap-4">
-                    <img src="https://logowik.com/content/uploads/images/pea-provincial-electricity-authority8229.logowik.com.webp" alt="PEA Logo" class="h-12" onerror="this.style.display='none'">
+                <div class="flex items-center gap-3 sm:gap-4">
+                    <img src="https://logowik.com/content/uploads/images/pea-provincial-electricity-authority8229.logowik.com.webp" alt="PEA Logo" class="h-10 sm:h-12" onerror="this.style.display='none'">
                     <div>
-                        <h1 class="text-xl md:text-2xl font-bold text-primary">ทะเบียนคุมหมายงาน WBS</h1>
-                        <p class="text-sm text-gray-500">การไฟฟ้าส่วนภูมิภาคจังหวัดนครพนม แผนกก่อสร้าง</p>
+                        <h1 class="text-lg md:text-2xl font-bold text-primary">ทะเบียนคุมหมายงาน WBS</h1>
+                        <p class="text-xs sm:text-sm text-gray-500">กฟภ.นครพนม แผนกก่อสร้าง</p>
                     </div>
                 </div>
                 <div class="flex items-center gap-2">
                     <template x-if="currentPage === 'stats' || currentPage === 'admin'">
-                        <button @click="changePage('home')" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium py-2 px-4 rounded-lg flex items-center gap-2">
+                        <button @click="changePage('home')" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium py-2 px-3 sm:px-4 rounded-lg flex items-center gap-2">
                             <i class="fas fa-home"></i>
-                            <span class="hidden md:inline">กลับหน้าแรก</span>
+                            <span class="hidden sm:inline">กลับหน้าแรก</span>
                         </button>
                     </template>
                     <template x-if="currentPage === 'admin'">
-                         <button @click="logout()" class="bg-red-500 hover:bg-red-600 text-white font-medium py-2 px-4 rounded-lg flex items-center gap-2">
+                         <button @click="logout()" class="bg-red-500 hover:bg-red-600 text-white font-medium py-2 px-3 sm:px-4 rounded-lg flex items-center gap-2">
                             <i class="fas fa-sign-out-alt"></i>
-                            <span class="hidden md:inline">ออกจากระบบ</span>
+                            <span class="hidden sm:inline">ออกจากระบบ</span>
                         </button>
                     </template>
                 </div>
             </div>
         </header>
         
-        <main class="container mx-auto p-4 md:p-6">
+        <main class="container mx-auto p-3 md:p-6">
             <!-- ===== HOME PAGE ===== -->
             <div x-show="currentPage === 'home'" x-cloak>
                 <!-- Dashboard Cards -->
-                <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-                    <div @click="applyStatusFilter('งานใหม่')" class="bg-white p-5 rounded-xl shadow-sm border-l-4 border-info cursor-pointer hover:shadow-lg transition-shadow">
+                <section class="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mb-6">
+                    <div @click="applyStatusFilter('งานใหม่')" class="bg-white p-4 rounded-xl shadow-sm border-l-4 border-info cursor-pointer hover:shadow-lg transition-shadow">
                         <div class="flex justify-between items-center">
                             <div>
-                                <p class="text-sm font-medium text-gray-500">งานใหม่</p>
-                                <p class="text-2xl font-bold text-gray-800" x-text="stats.new"></p>
+                                <p class="text-xs sm:text-sm font-medium text-gray-500">งานใหม่</p>
+                                <p class="text-xl sm:text-2xl font-bold text-gray-800" x-text="stats.new"></p>
                             </div>
-                            <div class="bg-blue-100 text-info p-3 rounded-full">
+                            <div class="bg-blue-100 text-info p-2 sm:p-3 rounded-full">
                                 <i class="fas fa-file-alt fa-lg"></i>
                             </div>
                         </div>
                     </div>
-                    <div @click="applyStatusFilter('กำลังดำเนินงาน')" class="bg-white p-5 rounded-xl shadow-sm border-l-4 border-warning cursor-pointer hover:shadow-lg transition-shadow">
+                    <div @click="applyStatusFilter('กำลังดำเนินงาน')" class="bg-white p-4 rounded-xl shadow-sm border-l-4 border-warning cursor-pointer hover:shadow-lg transition-shadow">
                         <div class="flex justify-between items-center">
                             <div>
-                                <p class="text-sm font-medium text-gray-500">กำลังดำเนินงาน</p>
-                                <p class="text-2xl font-bold text-gray-800" x-text="stats.inProgress"></p>
+                                <p class="text-xs sm:text-sm font-medium text-gray-500">กำลังดำเนินงาน</p>
+                                <p class="text-xl sm:text-2xl font-bold text-gray-800" x-text="stats.inProgress"></p>
                             </div>
-                            <div class="bg-orange-100 text-warning p-3 rounded-full">
+                            <div class="bg-orange-100 text-warning p-2 sm:p-3 rounded-full">
                                 <i class="fas fa-tasks fa-lg"></i>
                             </div>
                         </div>
                     </div>
-                    <div @click="applyStatusFilter('ปิดงาน')" class="bg-white p-5 rounded-xl shadow-sm border-l-4 border-green-500 cursor-pointer hover:shadow-lg transition-shadow">
+                    <div @click="applyStatusFilter('ปิดงาน')" class="bg-white p-4 rounded-xl shadow-sm border-l-4 border-green-500 cursor-pointer hover:shadow-lg transition-shadow">
                         <div class="flex justify-between items-center">
                             <div>
-                                <p class="text-sm font-medium text-gray-500">ปิดงาน</p>
-                                <p class="text-2xl font-bold text-gray-800" x-text="stats.done"></p>
+                                <p class="text-xs sm:text-sm font-medium text-gray-500">ปิดงาน</p>
+                                <p class="text-xl sm:text-2xl font-bold text-gray-800" x-text="stats.done"></p>
                             </div>
-                            <div class="bg-green-100 text-green-600 p-3 rounded-full">
+                            <div class="bg-green-100 text-green-600 p-2 sm:p-3 rounded-full">
                                 <i class="fas fa-check-circle fa-lg"></i>
                             </div>
                         </div>
                     </div>
-                    <div @click="applyStatusFilter('')" class="bg-white p-5 rounded-xl shadow-sm border-l-4 border-primary cursor-pointer hover:shadow-lg transition-shadow">
+                    <div @click="applyStatusFilter('')" class="bg-white p-4 rounded-xl shadow-sm border-l-4 border-primary cursor-pointer hover:shadow-lg transition-shadow col-span-2 lg:col-span-1">
                         <div class="flex justify-between items-center">
                             <div>
-                                <p class="text-sm font-medium text-gray-500">งานทั้งหมด (เดือนนี้)</p>
-                                <p class="text-2xl font-bold text-gray-800" x-text="stats.totalMonth"></p>
+                                <p class="text-xs sm:text-sm font-medium text-gray-500">งานทั้งหมด (เดือนนี้)</p>
+                                <p class="text-xl sm:text-2xl font-bold text-gray-800" x-text="stats.totalMonth"></p>
                             </div>
-                            <div class="bg-purple-100 text-primary p-3 rounded-full">
+                            <div class="bg-purple-100 text-primary p-2 sm:p-3 rounded-full">
                                 <i class="fas fa-layer-group fa-lg"></i>
                             </div>
                         </div>
@@ -179,25 +179,24 @@
 
                 <!-- Filters and Table Section -->
                 <div class="bg-white p-4 sm:p-6 rounded-xl shadow-sm">
-                    <div class="flex flex-wrap gap-4 items-end mb-4">
-                        <!-- Filters -->
-                        <div class="flex-grow min-w-[150px]">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 items-end mb-4">
+                        <div class="lg:col-span-1">
                             <label class="text-sm font-medium text-gray-600">กลุ่มงาน</label>
                             <input type="text" x-model.debounce.300ms="filters.workGroup" placeholder="ค้นหา..." class="w-full mt-1 p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
                         </div>
-                        <div class="flex-grow min-w-[150px]">
+                        <div class="lg:col-span-1">
                             <label class="text-sm font-medium text-gray-600">WBS</label>
                             <input type="text" x-model.debounce.300ms="filters.wbs" placeholder="ค้นหา..." class="w-full mt-1 p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
                         </div>
-                        <div class="flex-grow min-w-[150px]">
+                         <div class="lg:col-span-1">
                             <label class="text-sm font-medium text-gray-600">ผู้ควบคุม</label>
                             <input type="text" x-model.debounce.300ms="filters.supervisor" placeholder="ค้นหา..." class="w-full mt-1 p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
                         </div>
-                        <div class="flex-grow min-w-[150px]">
+                        <div class="lg:col-span-1">
                             <label class="text-sm font-medium text-gray-600">ทีมงาน</label>
                             <input type="text" x-model.debounce.300ms="filters.team" placeholder="ค้นหา..." class="w-full mt-1 p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
                         </div>
-                        <button @click="resetFilters()" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium py-2 px-4 rounded-lg mt-1">ล้างค่า</button>
+                        <button @click="resetFilters()" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium py-2 px-4 rounded-lg w-full sm:w-auto lg:col-span-1">ล้างค่า</button>
                     </div>
 
                     <!-- Jobs Table -->
@@ -205,40 +204,38 @@
                         <table class="w-full text-sm text-left text-gray-600">
                             <thead class="text-xs text-gray-700 uppercase bg-gray-50">
                                 <tr>
-                                    <th @click="sortBy('date')" class="p-3 cursor-pointer">วันที่ <i class="fas fa-sort"></i></th>
-                                    <th class="p-3">เวลา</th>
-                                    <th class="p-3">WBS</th>
-                                    <th class="p-3">ชื่องาน</th>
-                                    <th class="p-3">ผู้ควบคุม</th>
-                                    <th class="p-3">ทีมงาน</th>
-                                    <th @click="sortBy('dueDate')" class="p-3 cursor-pointer">วันครบกำหนด <i class="fas fa-sort"></i></th>
-                                    <th @click="sortBy('status')" class="p-3 cursor-pointer">สถานะ <i class="fas fa-sort"></i></th>
-                                    <th class="p-3 text-center">จัดการ</th>
+                                    <th @click="sortBy('date')" class="p-2 sm:p-3 cursor-pointer">วันที่ <i class="fas fa-sort"></i></th>
+                                    <th class="p-2 sm:p-3">เวลา</th>
+                                    <th class="p-2 sm:p-3">WBS</th>
+                                    <th class="p-2 sm:p-3">ชื่องาน</th>
+                                    <th class="p-2 sm:p-3 hidden md:table-cell">ผู้ควบคุม</th>
+                                    <th class="p-2 sm:p-3 hidden lg:table-cell">ทีมงาน</th>
+                                    <th @click="sortBy('status')" class="p-2 sm:p-3 cursor-pointer">สถานะ <i class="fas fa-sort"></i></th>
+                                    <th class="p-2 sm:p-3 text-center">จัดการ</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <template x-if="paginatedJobs.length === 0">
                                     <tr>
-                                        <td colspan="9" class="text-center p-6 text-gray-500">ไม่พบข้อมูล</td>
+                                        <td colspan="11" class="text-center p-6 text-gray-500">ไม่พบข้อมูล</td>
                                     </tr>
                                 </template>
                                 <template x-for="job in paginatedJobs" :key="job.id">
                                     <tr class="bg-white border-b hover:bg-gray-50">
-                                        <td class="p-3" x-text="formatJustDate(job.date)"></td>
-                                        <td class="p-3" x-text="formatTime(job.date)"></td>
-                                        <td class="p-3 font-medium text-gray-800" x-text="job.wbs"></td>
-                                        <td class="p-3" x-text="job.jobName"></td>
-                                        <td class="p-3" x-text="job.supervisor"></td>
-                                        <td class="p-3" x-text="job.team"></td>
-                                        <td class="p-3" x-text="formatJustDate(job.dueDate)"></td>
-                                        <td class="p-3">
+                                        <td class="p-2 sm:p-3" x-text="formatJustDate(job.date)"></td>
+                                        <td class="p-2 sm:p-3" x-text="formatTime(job.date)"></td>
+                                        <td class="p-2 sm:p-3 font-medium text-gray-800" x-text="job.wbs"></td>
+                                        <td class="p-2 sm:p-3" x-text="job.jobName"></td>
+                                        <td class="p-2 sm:p-3 hidden md:table-cell" x-text="job.supervisor"></td>
+                                        <td class="p-2 sm:p-3 hidden lg:table-cell" x-text="job.team"></td>
+                                        <td class="p-2 sm:p-3">
                                             <span class="status-badge" :class="{
                                                 'status-new': job.status === 'งานใหม่',
                                                 'status-progress': job.status === 'กำลังดำเนินงาน',
                                                 'status-done': job.status === 'ปิดงาน'
                                             }" x-text="job.status"></span>
                                         </td>
-                                        <td class="p-3 text-center whitespace-nowrap">
+                                        <td class="p-2 sm:p-3 text-center whitespace-nowrap">
                                             <button @click="showJobDetails(job)" class="text-blue-500 hover:text-blue-700 mx-1" title="ดูรายละเอียด"><i class="fas fa-eye"></i></button>
                                             <button @click="editJob(job.id)" class="text-yellow-500 hover:text-yellow-700 mx-1" title="แก้ไข"><i class="fas fa-pencil-alt"></i></button>
                                             <button @click="deleteJobWithPassword(job.id)" class="text-red-500 hover:text-red-700 mx-1" title="ลบ"><i class="fas fa-trash-alt"></i></button>
@@ -250,9 +247,9 @@
                     </div>
 
                     <!-- Pagination -->
-                    <div class="flex justify-between items-center mt-4">
+                    <div class="flex flex-col sm:flex-row justify-between items-center mt-4 gap-4">
                         <span class="text-sm text-gray-600">
-                            แสดง <span x-text="(tableCurrentPage - 1) * itemsPerPage + 1"></span> 
+                            แสดง <span x-text="filteredJobs.length > 0 ? (tableCurrentPage - 1) * itemsPerPage + 1 : 0"></span> 
                             ถึง <span x-text="Math.min(tableCurrentPage * itemsPerPage, filteredJobs.length)"></span> 
                             จาก <span x-text="filteredJobs.length"></span> รายการ
                         </span>
@@ -266,57 +263,61 @@
             </div>
 
             <!-- ===== STATISTICS PAGE ===== -->
-            <div x-show="currentPage === 'stats'" x-cloak class="bg-white p-6 rounded-xl shadow-sm">
+            <div x-show="currentPage === 'stats'" x-cloak class="bg-white p-4 sm:p-6 rounded-xl shadow-sm">
                 <h2 class="text-2xl font-bold mb-4 text-primary">สถิติและรายงาน</h2>
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     <div class="p-4 border rounded-lg"><canvas id="workGroupChart"></canvas></div>
                     <div class="p-4 border rounded-lg"><canvas id="supervisorChart"></canvas></div>
                     <div class="p-4 border rounded-lg col-span-1 lg:col-span-2">
-                        <div class="flex justify-between items-center mb-2">
+                        <div class="flex flex-col sm:flex-row justify-between sm:items-center mb-2 gap-2">
                             <h3 class="font-semibold">สถิติงานที่ขอ</h3>
-                            <select x-model="statsDateFilter" @change="renderDateStatsChart()" class="p-2 border border-gray-300 rounded-lg text-sm">
+                            <select x-model="statsDateFilter" @change="renderDateStatsChart()" class="p-2 border border-gray-300 rounded-lg text-sm w-full sm:w-auto">
                                 <option value="daily">รายวัน</option>
                                 <option value="weekly">รายสัปดาห์</option>
                                 <option value="monthly">รายเดือน</option>
                                 <option value="yearly">รายปี</option>
                             </select>
                         </div>
-                        <canvas id="dateStatsChart"></canvas>
+                        <div><canvas id="dateStatsChart"></canvas></div>
                     </div>
-                    <div class="p-4 border rounded-lg col-span-1 lg:col-span-2"><canvas id="statusByGroupChart"></canvas></div>
+                    <div class="p-4 border rounded-lg col-span-1 lg:col-span-2">
+                        <div><canvas id="statusByGroupChart"></canvas></div>
+                    </div>
                 </div>
             </div>
 
             <!-- ===== ADMIN PAGE ===== -->
             <div x-show="currentPage === 'admin'" x-cloak>
                  <h2 class="text-2xl font-bold mb-4 text-primary">หน้าจัดการสำหรับ Admin</h2>
-                <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-                     <div class="bg-white p-5 rounded-xl shadow-sm border-l-4 border-info">
-                        <p class="text-sm font-medium text-gray-500">งานใหม่</p>
-                        <p class="text-2xl font-bold text-gray-800" x-text="stats.new"></p>
+                <section class="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mb-6">
+                    <div class="bg-white p-4 rounded-xl shadow-sm border-l-4 border-info">
+                        <p class="text-xs sm:text-sm font-medium text-gray-500">งานใหม่</p>
+                        <p class="text-xl sm:text-2xl font-bold text-gray-800" x-text="stats.new"></p>
                     </div>
-                    <div class="bg-white p-5 rounded-xl shadow-sm border-l-4 border-warning">
-                        <p class="text-sm font-medium text-gray-500">กำลังดำเนินงาน</p>
-                        <p class="text-2xl font-bold text-gray-800" x-text="stats.inProgress"></p>
+                    <div class="bg-white p-4 rounded-xl shadow-sm border-l-4 border-warning">
+                        <p class="text-xs sm:text-sm font-medium text-gray-500">กำลังดำเนินงาน</p>
+                        <p class="text-xl sm:text-2xl font-bold text-gray-800" x-text="stats.inProgress"></p>
                     </div>
-                    <div class="bg-white p-5 rounded-xl shadow-sm border-l-4 border-green-500">
-                        <p class="text-sm font-medium text-gray-500">ปิดงาน</p>
-                        <p class="text-2xl font-bold text-gray-800" x-text="stats.done"></p>
+                    <div class="bg-white p-4 rounded-xl shadow-sm border-l-4 border-green-500">
+                        <p class="text-xs sm:text-sm font-medium text-gray-500">ปิดงาน</p>
+                        <p class="text-xl sm:text-2xl font-bold text-gray-800" x-text="stats.done"></p>
                     </div>
-                    <div class="bg-white p-5 rounded-xl shadow-sm border-l-4 border-primary">
-                        <p class="text-sm font-medium text-gray-500">งานทั้งหมด (เดือนนี้)</p>
-                        <p class="text-2xl font-bold text-gray-800" x-text="stats.totalMonth"></p>
+                    <div class="bg-white p-4 rounded-xl shadow-sm border-l-4 border-primary col-span-2 lg:col-span-1">
+                        <p class="text-xs sm:text-sm font-medium text-gray-500">งานทั้งหมด (เดือนนี้)</p>
+                        <p class="text-xl sm:text-2xl font-bold text-gray-800" x-text="stats.totalMonth"></p>
                     </div>
                 </section>
 
                 <div class="bg-white p-4 sm:p-6 rounded-xl shadow-sm">
                     <div class="mb-4 flex flex-wrap gap-2">
-                        <button @click="showManageDataModal('workGroups', 'กลุ่มงาน')" class="btn-primary py-2 px-4 rounded-lg flex items-center gap-2"><i class="fas fa-users-cog"></i> จัดการกลุ่มงาน</button>
-                        <button @click="showManageDataModal('supervisors', 'ผู้ควบคุม')" class="btn-primary py-2 px-4 rounded-lg flex items-center gap-2"><i class="fas fa-user-tie"></i> จัดการผู้ควบคุม</button>
-                        <button @click="showManageDataModal('teams', 'ทีมงาน')" class="btn-primary py-2 px-4 rounded-lg flex items-center gap-2"><i class="fas fa-users"></i> จัดการทีมงาน</button>
-                        <button @click="showManageDataModal('poleTypes', 'ประเภทเสา')" class="bg-gray-700 text-white hover:bg-gray-800 py-2 px-4 rounded-lg flex items-center gap-2"><i class="fas fa-hard-hat"></i> จัดการประเภทเสา</button>
-                        <button @click="showManageDataModal('wireTypes', 'ประเภทสายไฟ')" class="bg-gray-700 text-white hover:bg-gray-800 py-2 px-4 rounded-lg flex items-center gap-2"><i class="fas fa-bolt"></i> จัดการประเภทสายไฟ</button>
-                        <button @click="showManageDataModal('transformerTypes', 'ประเภทหม้อแปลง')" class="bg-gray-700 text-white hover:bg-gray-800 py-2 px-4 rounded-lg flex items-center gap-2"><i class="fas fa-plug"></i> จัดการประเภทหม้อแปลง</button>
+                        <button @click="showManageDataModal('workGroups', 'กลุ่มงาน')" class="btn-primary py-2 px-3 text-sm rounded-lg flex items-center gap-2 flex-grow sm:flex-grow-0"><i class="fas fa-users-cog"></i> <span class="hidden sm:inline">จัดการกลุ่มงาน</span></button>
+                        <button @click="showManageDataModal('supervisors', 'ผู้ควบคุม')" class="btn-primary py-2 px-3 text-sm rounded-lg flex items-center gap-2 flex-grow sm:flex-grow-0"><i class="fas fa-user-tie"></i> <span class="hidden sm:inline">จัดการผู้ควบคุม</span></button>
+                        <button @click="showManageDataModal('teams', 'ทีมงาน')" class="btn-primary py-2 px-3 text-sm rounded-lg flex items-center gap-2 flex-grow sm:flex-grow-0"><i class="fas fa-users"></i> <span class="hidden sm:inline">จัดการทีมงาน</span></button>
+                    </div>
+                     <div class="mb-4 flex flex-wrap gap-2 border-t pt-4">
+                        <button @click="showManageDataModal('poleTypes', 'ประเภทเสา')" class="bg-gray-700 text-white hover:bg-gray-800 py-2 px-3 text-sm rounded-lg flex items-center gap-2 flex-grow sm:flex-grow-0"><i class="fas fa-hard-hat"></i> <span class="hidden sm:inline">จัดการประเภทเสา</span></button>
+                        <button @click="showManageDataModal('wireTypes', 'ประเภทสายไฟ')" class="bg-gray-700 text-white hover:bg-gray-800 py-2 px-3 text-sm rounded-lg flex items-center gap-2 flex-grow sm:flex-grow-0"><i class="fas fa-bolt"></i> <span class="hidden sm:inline">จัดการประเภทสายไฟ</span></button>
+                        <button @click="showManageDataModal('transformerTypes', 'ประเภทหม้อแปลง')" class="bg-gray-700 text-white hover:bg-gray-800 py-2 px-3 text-sm rounded-lg flex items-center gap-2 flex-grow sm:flex-grow-0"><i class="fas fa-plug"></i> <span class="hidden sm:inline">จัดการประเภทหม้อแปลง</span></button>
                     </div>
                     
                     <div class="flex flex-wrap gap-4 items-end mb-4 border-t pt-4">
@@ -333,46 +334,48 @@
                             <label class="text-sm font-medium text-gray-600">ผู้ควบคุม</label>
                             <input type="text" x-model.debounce.300ms="filters.supervisor" placeholder="ค้นหา..." class="w-full mt-1 p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
                         </div>
-                        <button @click="resetFilters()" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium py-2 px-4 rounded-lg mt-1">ล้างค่า</button>
+                        <button @click="resetFilters()" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium py-2 px-4 rounded-lg">ล้างค่า</button>
                     </div>
                     
                     <div class="table-container overflow-x-auto">
                         <table class="w-full text-sm text-left text-gray-600">
                              <thead class="text-xs text-gray-700 uppercase bg-gray-50">
                                 <tr>
-                                    <th class="p-3">วันที่</th>
-                                    <th class="p-3">WBS</th>
-                                    <th class="p-3">ชื่องาน</th>
-                                    <th class="p-3">ผู้ควบคุม</th>
-                                    <th class="p-3">สถานะ</th>
-                                    <th class="p-3 text-center">จัดการ</th>
+                                    <th class="p-2 sm:p-3">วันที่</th>
+                                    <th class="p-2 sm:p-3">WBS</th>
+                                    <th class="p-2 sm:p-3">ชื่องาน</th>
+                                    <th class="p-2 sm:p-3 hidden md:table-cell">ผู้ควบคุม</th>
+                                    <th class="p-2 sm:p-3">สถานะ</th>
+                                    <th class="p-2 sm:p-3 text-center">จัดการ</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <template x-if="paginatedJobs.length === 0">
                                     <tr>
-                                        <td colspan="6" class="text-center p-6 text-gray-500">ไม่พบข้อมูล</td>
+                                        <td colspan="8" class="text-center p-6 text-gray-500">ไม่พบข้อมูล</td>
                                     </tr>
                                 </template>
                                 <template x-for="job in paginatedJobs" :key="job.id">
                                     <tr class="bg-white border-b hover:bg-gray-50">
-                                        <td class="p-3" x-text="formatJustDate(job.date)"></td>
-                                        <td class="p-3 font-medium text-gray-800" x-text="job.wbs"></td>
-                                        <td class="p-3" x-text="job.jobName"></td>
-                                        <td class="p-3" x-text="job.supervisor"></td>
-                                        <td class="p-3">
+                                        <td class="p-2 sm:p-3" x-text="formatJustDate(job.date)"></td>
+                                        <td class="p-2 sm:p-3 font-medium text-gray-800" x-text="job.wbs"></td>
+                                        <td class="p-2 sm:p-3" x-text="job.jobName"></td>
+                                        <td class="p-2 sm:p-3 hidden md:table-cell" x-text="job.supervisor"></td>
+                                        <td class="p-2 sm:p-3">
                                             <span class="status-badge" :class="{
                                                 'status-new': job.status === 'งานใหม่',
                                                 'status-progress': job.status === 'กำลังดำเนินงาน',
                                                 'status-done': job.status === 'ปิดงาน'
                                             }" x-text="job.status"></span>
                                         </td>
-                                        <td class="p-3 text-center whitespace-nowrap">
-                                            <button @click="showJobDetails(job)" class="text-blue-500 hover:text-blue-700 mx-1" title="ดูรายละเอียด"><i class="fas fa-eye"></i></button>
-                                            <button @click="editJob(job.id)" class="text-yellow-500 hover:text-yellow-700 mx-1" title="แก้ไข"><i class="fas fa-pencil-alt"></i></button>
-                                            <button @click="updateStatus(job.id, 'กำลังดำเนินงาน')" :disabled="job.status !== 'งานใหม่'" class="text-white bg-orange-500 hover:bg-orange-600 rounded px-2 py-1 mx-1 text-xs disabled:opacity-50 disabled:cursor-not-allowed">เริ่มงาน</button>
-                                            <button @click="updateStatus(job.id, 'ปิดงาน')" :disabled="job.status !== 'กำลังดำเนินงาน'" class="text-white bg-green-500 hover:bg-green-600 rounded px-2 py-1 mx-1 text-xs disabled:opacity-50 disabled:cursor-not-allowed">ปิดงาน</button>
-                                            <button @click="deleteJob(job.id)" class="text-red-500 hover:text-red-700 mx-1" title="ลบ"><i class="fas fa-trash-alt"></i></button>
+                                        <td class="p-2 sm:p-3 text-center whitespace-nowrap">
+                                            <div class="flex justify-center items-center gap-1 flex-wrap">
+                                                <button @click="showJobDetails(job)" class="text-blue-500 hover:text-blue-700 p-1" title="ดูรายละเอียด"><i class="fas fa-eye"></i></button>
+                                                <button @click="editJob(job.id)" class="text-yellow-500 hover:text-yellow-700 p-1" title="แก้ไข"><i class="fas fa-pencil-alt"></i></button>
+                                                <button @click="updateStatus(job.id, 'กำลังดำเนินงาน')" :disabled="job.status !== 'งานใหม่'" class="text-white bg-orange-500 hover:bg-orange-600 rounded px-2 py-1 text-xs disabled:opacity-50 disabled:cursor-not-allowed">เริ่มงาน</button>
+                                                <button @click="updateStatus(job.id, 'ปิดงาน')" :disabled="job.status !== 'กำลังดำเนินงาน'" class="text-white bg-green-500 hover:bg-green-600 rounded px-2 py-1 text-xs disabled:opacity-50 disabled:cursor-not-allowed">ปิดงาน</button>
+                                                <button @click="deleteJob(job.id)" class="text-red-500 hover:text-red-700 p-1" title="ลบ"><i class="fas fa-trash-alt"></i></button>
+                                            </div>
                                         </td>
                                     </tr>
                                 </template>
@@ -385,16 +388,16 @@
     </div>
 
     <!-- Floating Action Buttons -->
-    <div class="fixed bottom-6 right-6 flex flex-col gap-3 z-50">
+    <div class="fixed bottom-4 right-4 flex flex-col gap-3 z-50">
       <template x-if="currentPage === 'home'">
         <div>
-            <button @click="showAdminLoginModal()" class="bg-gray-700 mb-3 text-white w-14 h-14 rounded-full flex items-center justify-center shadow-lg hover:bg-gray-800 transition-transform hover:scale-110" title="เข้าระบบ Admin">
+            <button @click="showAdminLoginModal()" class="bg-gray-700 mb-3 text-white w-12 h-12 sm:w-14 sm:h-14 rounded-full flex items-center justify-center shadow-lg hover:bg-gray-800 transition-transform hover:scale-110" title="เข้าระบบ Admin">
                 <i class="fas fa-user-shield fa-lg"></i>
             </button>
-            <button @click="changePage('stats')" class="bg-info mb-3 text-white w-14 h-14 rounded-full flex items-center justify-center shadow-lg hover:bg-blue-600 transition-transform hover:scale-110" title="ดูสถิติ">
+            <button @click="changePage('stats')" class="bg-info mb-3 text-white w-12 h-12 sm:w-14 sm:h-14 rounded-full flex items-center justify-center shadow-lg hover:bg-blue-600 transition-transform hover:scale-110" title="ดูสถิติ">
                 <i class="fas fa-chart-bar fa-lg"></i>
             </button>
-            <button @click="addJob()" class="btn-primary text-white w-14 h-14 rounded-full flex items-center justify-center shadow-lg hover:bg-purple-800 transition-transform hover:scale-110" title="เพิ่มข้อมูลคำสั่ง">
+            <button @click="addJob()" class="btn-primary text-white w-12 h-12 sm:w-14 sm:h-14 rounded-full flex items-center justify-center shadow-lg hover:bg-purple-800 transition-transform hover:scale-110" title="เพิ่มข้อมูลคำสั่ง">
                 <i class="fas fa-plus fa-lg"></i>
             </button>
         </div>
@@ -406,10 +409,10 @@
     <!-- Add/Edit Job Modal -->
     <div x-show="showJobModal" x-cloak class="fixed inset-0 modal-backdrop flex items-center justify-center z-[1000] p-4" @click.self="showJobModal = false">
         <div class="bg-white rounded-xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto">
-            <div class="p-6 border-b sticky top-0 bg-white z-10">
+            <div class="p-4 sm:p-6 border-b sticky top-0 bg-white z-10">
                 <h3 class="text-xl font-bold text-primary" x-text="isEditing ? 'แก้ไขข้อมูลงาน' : 'เพิ่มข้อมูลงานใหม่'"></h3>
             </div>
-            <form @submit.prevent="saveJob" class="p-6 space-y-4">
+            <form @submit.prevent="saveJob" class="p-4 sm:p-6 space-y-4">
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div class="md:col-span-1">
                         <label class="block text-sm font-medium text-gray-700">วันที่ (อัตโนมัติ)</label>
@@ -460,6 +463,20 @@
                     </div>
                 </div>
                 
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">ค่าแรง</label>
+                        <input type="number" min="0" step="any" x-model.number="jobForm.laborCost" placeholder="ระบุจำนวนเงิน (บาท)" class="mt-1 block w-full p-2 border border-gray-300 rounded-lg shadow-sm focus:ring-primary focus:border-primary">
+                    </div>
+                     <div>
+                        <label class="block text-sm font-medium text-gray-700">สถานะค่าแรง</label>
+                        <select x-model="jobForm.laborCostStatus" required class="mt-1 block w-full p-2 border border-gray-300 rounded-lg shadow-sm focus:ring-primary focus:border-primary">
+                            <option value="ยังไม่จ่าย">ยังไม่จ่าย</option>
+                            <option value="จ่ายแล้ว">จ่ายแล้ว</option>
+                        </select>
+                    </div>
+                </div>
+
                  <div class="pt-4 border-t">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
@@ -551,7 +568,7 @@
     
     <!-- Admin Login Modal -->
     <div x-show="showAdminModal" x-cloak class="fixed inset-0 modal-backdrop flex items-center justify-center z-[1000]" @click.self="showAdminModal = false">
-        <div class="bg-white rounded-xl shadow-2xl w-full max-w-sm p-8">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-sm p-8 mx-4">
             <h3 class="text-2xl font-bold text-center text-primary mb-6">Admin Login</h3>
             <form @submit.prevent="login">
                 <div class="mb-4">
@@ -568,7 +585,7 @@
     </div>
 
     <!-- Manage Dropdown Data Modal -->
-    <div x-show="showManageData" x-cloak class="fixed inset-0 modal-backdrop flex items-center justify-center z-[1000]" @click.self="showManageData = false">
+    <div x-show="showManageData" x-cloak class="fixed inset-0 modal-backdrop flex items-center justify-center z-[1000] p-4" @click.self="showManageData = false">
         <div class="bg-white rounded-xl shadow-2xl w-full max-w-md p-6">
             <h3 class="text-xl font-bold text-primary mb-4" x-text="`จัดการข้อมูล${manageData.title}`"></h3>
             <div class="mb-4">
@@ -654,7 +671,18 @@
                 this.resetJobForm();
                 this.filterJobs();
                 this.calculateStats();
+
+                // Hide columns on mobile for home page table
+                this.$watch('currentPage', (value) => {
+                     if(value === 'home') this.adjustTableColumnsForMobile();
+                });
+                this.adjustTableColumnsForMobile();
+                
                 this.hideSpinner();
+            },
+
+            adjustTableColumnsForMobile() {
+                 // This is now handled by Tailwind's responsive classes (e.g., hidden md:table-cell)
             },
             
             loadFromLocalStorage() {
@@ -695,6 +723,7 @@
                 this.jobForm = {
                     id: null, date: '', workGroup: '', wbs: '', jobName: '', supervisor: '', team: '',
                     contractDate: '', dueDate: '', status: 'งานใหม่',
+                    laborCost: null, laborCostStatus: 'ยังไม่จ่าย',
                     equipment: {
                         pole: { type: '', quantity: null },
                         wire: { type: '', quantity: null },
@@ -803,6 +832,8 @@
                             <p><strong>กลุ่มงาน:</strong> ${job.workGroup}</p>
                             <p><strong>ผู้ควบคุม:</strong> ${job.supervisor}</p>
                             <p><strong>ทีมงาน:</strong> ${job.team}</p>
+                            <p><strong>ค่าแรง:</strong> ${this.formatCurrency(job.laborCost)}</p>
+                            <p><strong>สถานะค่าแรง:</strong> <span class="status-badge" style="background-color: ${job.laborCostStatus === 'ยังไม่จ่าย' ? '#FECACA; color: #B91C1C;' : '#D1FAE5; color: #047857;'}">${job.laborCostStatus || 'N/A'}</span></p>
                             <p><strong>วันครบกำหนด:</strong> ${this.formatJustDate(job.dueDate)}</p>
                             <p><strong>สถานะ:</strong> <span class="status-badge" style="background-color: ${job.status === 'งานใหม่' ? '#E3F2FD; color: #0288D1;' : job.status === 'กำลังดำเนินงาน' ? '#FFF3E0; color: #F57C00;' : '#E8F5E9; color: #388E3C;'}">${job.status}</span></p>
                         </div>
@@ -906,6 +937,7 @@
                 this.charts[chartId] = new Chart(ctx, { type, data, options });
             },
             renderAllCharts() {
+                Chart.defaults.font.family = "'Kanit', sans-serif";
                 this.renderWorkGroupChart();
                 this.renderSupervisorChart();
                 this.renderDateStatsChart();
@@ -916,14 +948,14 @@
                 if(!ctx) return;
                 const counts = this.workGroups.map(group => ({ group, count: this.jobs.filter(j => j.workGroup === group).length }));
                 const data = { labels: counts.map(c => c.group), datasets: [{ label: 'จำนวนงาน', data: counts.map(c => c.count), backgroundColor: 'rgba(74, 44, 109, 0.6)', borderColor: 'rgba(74, 44, 109, 1)', borderWidth: 1 }] };
-                this.renderChart(ctx, 'bar', data, { responsive: true, plugins: { title: { display: true, text: 'จำนวนงานตามกลุ่มงาน' } } });
+                this.renderChart(ctx, 'bar', data, { responsive: true, maintainAspectRatio: false, plugins: { title: { display: true, text: 'จำนวนงานตามกลุ่มงาน' } } });
             },
             renderSupervisorChart() {
                 const ctx = document.getElementById('supervisorChart')?.getContext('2d');
                  if(!ctx) return;
                 const counts = this.supervisors.map(sup => ({ sup, count: this.jobs.filter(j => j.supervisor === sup).length }));
                 const data = { labels: counts.map(c => c.sup), datasets: [{ label: 'จำนวนงาน', data: counts.map(c => c.count), backgroundColor: 'rgba(2, 136, 209, 0.6)', borderColor: 'rgba(2, 136, 209, 1)', borderWidth: 1 }] };
-                this.renderChart(ctx, 'bar', data, { responsive: true, plugins: { title: { display: true, text: 'จำนวนงานตามผู้ควบคุม' } } });
+                this.renderChart(ctx, 'bar', data, { responsive: true, maintainAspectRatio: false, plugins: { title: { display: true, text: 'จำนวนงานตามผู้ควบคุม' } } });
             },
 
             renderDateStatsChart() {
@@ -945,9 +977,14 @@
                     groupedData[key] = (groupedData[key] || 0) + 1;
                 });
                 
-                const sortedKeys = Object.keys(groupedData).sort();
+                const sortedKeys = Object.keys(groupedData).sort((a, b) => {
+                    // Custom sort for dates and weeks
+                    if (this.statsDateFilter === 'daily') return new Date(a.split('/').reverse().join('-')) - new Date(b.split('/').reverse().join('-'));
+                    return a.localeCompare(b, undefined, { numeric: true });
+                });
+                
                 const data = { labels: sortedKeys, datasets: [{ label: 'จำนวนงาน', data: sortedKeys.map(key => groupedData[key]), fill: true, backgroundColor: 'rgba(245, 124, 0, 0.2)', borderColor: 'rgba(245, 124, 0, 1)', tension: 0.1 }] };
-                this.renderChart(ctx, 'line', data, { responsive: true, plugins: { title: { display: true, text: `สถิติงานที่ขอ (${this.statsDateFilter})` } } });
+                this.renderChart(ctx, 'line', data, { responsive: true, maintainAspectRatio: false, plugins: { title: { display: true, text: `สถิติงานที่ขอ` } } });
             },
 
             renderStatusByGroupChart() {
@@ -960,7 +997,7 @@
                     backgroundColor: ['rgba(2, 136, 209, 0.7)', 'rgba(245, 124, 0, 0.7)', 'rgba(56, 142, 60, 0.7)'][index]
                 }));
                 const data = { labels: this.workGroups, datasets: datasets };
-                this.renderChart(ctx, 'bar', data, { responsive: true, scales: { x: { stacked: true }, y: { stacked: true } }, plugins: { title: { display: true, text: 'สถานะงาน แยกตามกลุ่มงาน' } } });
+                this.renderChart(ctx, 'bar', data, { responsive: true, maintainAspectRatio: false, scales: { x: { stacked: true }, y: { stacked: true } }, plugins: { title: { display: true, text: 'สถานะงาน แยกตามกลุ่มงาน' } } });
             },
             
             handleFileSelect(event) { this.addFiles(event.target.files); event.target.value = null; },
@@ -975,6 +1012,11 @@
                 const startDate = new Date(this.jobForm.contractDate);
                 startDate.setDate(startDate.getDate() + parseInt(days));
                 this.jobForm.dueDate = startDate.toISOString().split('T')[0];
+            },
+
+            formatCurrency(value) {
+                if (value === null || value === undefined || isNaN(value)) return '-';
+                return new Intl.NumberFormat('th-TH', { style: 'currency', currency: 'THB' }).format(value);
             },
 
             formatJustDate(isoString) {
@@ -993,3 +1035,4 @@
     </script>
 </body>
 </html>
+
