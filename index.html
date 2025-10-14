@@ -1,0 +1,995 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ทะเบียนคุมหมายงาน WBS - กฟภ.นครพนม</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts: Kanit -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <!-- SweetAlert2 for Notifications -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <!-- Chart.js for Statistics -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- AlpineJS -->
+    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+
+    <style>
+        body {
+            font-family: 'Kanit', sans-serif;
+            background-color: #f0f2f5;
+        }
+        /* Custom Theme Colors */
+        :root {
+            --primary-color: #4A2C6D;
+            --danger-color: #D32F2F;
+            --warning-color: #F57C00;
+            --info-color: #0288D1;
+            --success-color: #388E3C;
+            --accent-color: #FBC02D;
+        }
+        .bg-primary { background-color: var(--primary-color); }
+        .text-primary { color: var(--primary-color); }
+        .border-primary { border-color: var(--primary-color); }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+            transition: background-color 0.3s;
+        }
+        .btn-primary:hover {
+            background-color: #382254;
+        }
+        
+        .modal-backdrop {
+            background-color: rgba(0,0,0,0.5);
+        }
+
+        /* Custom scrollbar for tables */
+        .table-container::-webkit-scrollbar {
+            height: 8px;
+        }
+        .table-container::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        .table-container::-webkit-scrollbar-thumb {
+            background: #ccc;
+            border-radius: 4px;
+        }
+        .table-container::-webkit-scrollbar-thumb:hover {
+            background: #aaa;
+        }
+
+        [x-cloak] { display: none !important; }
+
+        .swal2-popup {
+            font-family: 'Kanit', sans-serif;
+        }
+        
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-weight: 500;
+            font-size: 0.8rem;
+            white-space: nowrap;
+        }
+        .status-new { background-color: #E3F2FD; color: #0288D1; }
+        .status-progress { background-color: #FFF3E0; color: #F57C00; }
+        .status-done { background-color: #E8F5E9; color: #388E3C; }
+    </style>
+</head>
+<body x-data="app()" x-init="init()">
+
+    <!-- Loading Spinner -->
+    <div id="loading-spinner" class="fixed inset-0 bg-white bg-opacity-75 flex items-center justify-center z-[9999]" style="display: none;">
+        <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-primary"></div>
+    </div>
+
+    <!-- Main Container -->
+    <div class="min-h-screen">
+
+        <!-- Header -->
+        <header class="bg-white shadow-md p-4 sticky top-0 z-40">
+            <div class="container mx-auto flex justify-between items-center">
+                <div class="flex items-center gap-4">
+                    <img src="https://logowik.com/content/uploads/images/pea-provincial-electricity-authority8229.logowik.com.webp" alt="PEA Logo" class="h-12" onerror="this.style.display='none'">
+                    <div>
+                        <h1 class="text-xl md:text-2xl font-bold text-primary">ทะเบียนคุมหมายงาน WBS</h1>
+                        <p class="text-sm text-gray-500">การไฟฟ้าส่วนภูมิภาคจังหวัดนครพนม แผนกก่อสร้าง</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2">
+                    <template x-if="currentPage === 'stats' || currentPage === 'admin'">
+                        <button @click="changePage('home')" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium py-2 px-4 rounded-lg flex items-center gap-2">
+                            <i class="fas fa-home"></i>
+                            <span class="hidden md:inline">กลับหน้าแรก</span>
+                        </button>
+                    </template>
+                    <template x-if="currentPage === 'admin'">
+                         <button @click="logout()" class="bg-red-500 hover:bg-red-600 text-white font-medium py-2 px-4 rounded-lg flex items-center gap-2">
+                            <i class="fas fa-sign-out-alt"></i>
+                            <span class="hidden md:inline">ออกจากระบบ</span>
+                        </button>
+                    </template>
+                </div>
+            </div>
+        </header>
+        
+        <main class="container mx-auto p-4 md:p-6">
+            <!-- ===== HOME PAGE ===== -->
+            <div x-show="currentPage === 'home'" x-cloak>
+                <!-- Dashboard Cards -->
+                <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                    <div @click="applyStatusFilter('งานใหม่')" class="bg-white p-5 rounded-xl shadow-sm border-l-4 border-info cursor-pointer hover:shadow-lg transition-shadow">
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <p class="text-sm font-medium text-gray-500">งานใหม่</p>
+                                <p class="text-2xl font-bold text-gray-800" x-text="stats.new"></p>
+                            </div>
+                            <div class="bg-blue-100 text-info p-3 rounded-full">
+                                <i class="fas fa-file-alt fa-lg"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div @click="applyStatusFilter('กำลังดำเนินงาน')" class="bg-white p-5 rounded-xl shadow-sm border-l-4 border-warning cursor-pointer hover:shadow-lg transition-shadow">
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <p class="text-sm font-medium text-gray-500">กำลังดำเนินงาน</p>
+                                <p class="text-2xl font-bold text-gray-800" x-text="stats.inProgress"></p>
+                            </div>
+                            <div class="bg-orange-100 text-warning p-3 rounded-full">
+                                <i class="fas fa-tasks fa-lg"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div @click="applyStatusFilter('ปิดงาน')" class="bg-white p-5 rounded-xl shadow-sm border-l-4 border-green-500 cursor-pointer hover:shadow-lg transition-shadow">
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <p class="text-sm font-medium text-gray-500">ปิดงาน</p>
+                                <p class="text-2xl font-bold text-gray-800" x-text="stats.done"></p>
+                            </div>
+                            <div class="bg-green-100 text-green-600 p-3 rounded-full">
+                                <i class="fas fa-check-circle fa-lg"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div @click="applyStatusFilter('')" class="bg-white p-5 rounded-xl shadow-sm border-l-4 border-primary cursor-pointer hover:shadow-lg transition-shadow">
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <p class="text-sm font-medium text-gray-500">งานทั้งหมด (เดือนนี้)</p>
+                                <p class="text-2xl font-bold text-gray-800" x-text="stats.totalMonth"></p>
+                            </div>
+                            <div class="bg-purple-100 text-primary p-3 rounded-full">
+                                <i class="fas fa-layer-group fa-lg"></i>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Filters and Table Section -->
+                <div class="bg-white p-4 sm:p-6 rounded-xl shadow-sm">
+                    <div class="flex flex-wrap gap-4 items-end mb-4">
+                        <!-- Filters -->
+                        <div class="flex-grow min-w-[150px]">
+                            <label class="text-sm font-medium text-gray-600">กลุ่มงาน</label>
+                            <input type="text" x-model.debounce.300ms="filters.workGroup" placeholder="ค้นหา..." class="w-full mt-1 p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
+                        </div>
+                        <div class="flex-grow min-w-[150px]">
+                            <label class="text-sm font-medium text-gray-600">WBS</label>
+                            <input type="text" x-model.debounce.300ms="filters.wbs" placeholder="ค้นหา..." class="w-full mt-1 p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
+                        </div>
+                        <div class="flex-grow min-w-[150px]">
+                            <label class="text-sm font-medium text-gray-600">ผู้ควบคุม</label>
+                            <input type="text" x-model.debounce.300ms="filters.supervisor" placeholder="ค้นหา..." class="w-full mt-1 p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
+                        </div>
+                        <div class="flex-grow min-w-[150px]">
+                            <label class="text-sm font-medium text-gray-600">ทีมงาน</label>
+                            <input type="text" x-model.debounce.300ms="filters.team" placeholder="ค้นหา..." class="w-full mt-1 p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
+                        </div>
+                        <button @click="resetFilters()" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium py-2 px-4 rounded-lg mt-1">ล้างค่า</button>
+                    </div>
+
+                    <!-- Jobs Table -->
+                    <div class="table-container overflow-x-auto">
+                        <table class="w-full text-sm text-left text-gray-600">
+                            <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+                                <tr>
+                                    <th @click="sortBy('date')" class="p-3 cursor-pointer">วันที่ <i class="fas fa-sort"></i></th>
+                                    <th class="p-3">เวลา</th>
+                                    <th class="p-3">WBS</th>
+                                    <th class="p-3">ชื่องาน</th>
+                                    <th class="p-3">ผู้ควบคุม</th>
+                                    <th class="p-3">ทีมงาน</th>
+                                    <th @click="sortBy('dueDate')" class="p-3 cursor-pointer">วันครบกำหนด <i class="fas fa-sort"></i></th>
+                                    <th @click="sortBy('status')" class="p-3 cursor-pointer">สถานะ <i class="fas fa-sort"></i></th>
+                                    <th class="p-3 text-center">จัดการ</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <template x-if="paginatedJobs.length === 0">
+                                    <tr>
+                                        <td colspan="9" class="text-center p-6 text-gray-500">ไม่พบข้อมูล</td>
+                                    </tr>
+                                </template>
+                                <template x-for="job in paginatedJobs" :key="job.id">
+                                    <tr class="bg-white border-b hover:bg-gray-50">
+                                        <td class="p-3" x-text="formatJustDate(job.date)"></td>
+                                        <td class="p-3" x-text="formatTime(job.date)"></td>
+                                        <td class="p-3 font-medium text-gray-800" x-text="job.wbs"></td>
+                                        <td class="p-3" x-text="job.jobName"></td>
+                                        <td class="p-3" x-text="job.supervisor"></td>
+                                        <td class="p-3" x-text="job.team"></td>
+                                        <td class="p-3" x-text="formatJustDate(job.dueDate)"></td>
+                                        <td class="p-3">
+                                            <span class="status-badge" :class="{
+                                                'status-new': job.status === 'งานใหม่',
+                                                'status-progress': job.status === 'กำลังดำเนินงาน',
+                                                'status-done': job.status === 'ปิดงาน'
+                                            }" x-text="job.status"></span>
+                                        </td>
+                                        <td class="p-3 text-center whitespace-nowrap">
+                                            <button @click="showJobDetails(job)" class="text-blue-500 hover:text-blue-700 mx-1" title="ดูรายละเอียด"><i class="fas fa-eye"></i></button>
+                                            <button @click="editJob(job.id)" class="text-yellow-500 hover:text-yellow-700 mx-1" title="แก้ไข"><i class="fas fa-pencil-alt"></i></button>
+                                            <button @click="deleteJobWithPassword(job.id)" class="text-red-500 hover:text-red-700 mx-1" title="ลบ"><i class="fas fa-trash-alt"></i></button>
+                                        </td>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Pagination -->
+                    <div class="flex justify-between items-center mt-4">
+                        <span class="text-sm text-gray-600">
+                            แสดง <span x-text="(tableCurrentPage - 1) * itemsPerPage + 1"></span> 
+                            ถึง <span x-text="Math.min(tableCurrentPage * itemsPerPage, filteredJobs.length)"></span> 
+                            จาก <span x-text="filteredJobs.length"></span> รายการ
+                        </span>
+                        <div class="flex items-center gap-2">
+                            <button @click="prevPage()" :disabled="tableCurrentPage === 1" class="px-3 py-1 bg-gray-200 rounded-md disabled:opacity-50 disabled:cursor-not-allowed"><i class="fas fa-chevron-left"></i></button>
+                            <span x-text="tableCurrentPage"></span> / <span x-text="totalPages"></span>
+                            <button @click="nextPage()" :disabled="tableCurrentPage === totalPages" class="px-3 py-1 bg-gray-200 rounded-md disabled:opacity-50 disabled:cursor-not-allowed"><i class="fas fa-chevron-right"></i></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== STATISTICS PAGE ===== -->
+            <div x-show="currentPage === 'stats'" x-cloak class="bg-white p-6 rounded-xl shadow-sm">
+                <h2 class="text-2xl font-bold mb-4 text-primary">สถิติและรายงาน</h2>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="p-4 border rounded-lg"><canvas id="workGroupChart"></canvas></div>
+                    <div class="p-4 border rounded-lg"><canvas id="supervisorChart"></canvas></div>
+                    <div class="p-4 border rounded-lg col-span-1 lg:col-span-2">
+                        <div class="flex justify-between items-center mb-2">
+                            <h3 class="font-semibold">สถิติงานที่ขอ</h3>
+                            <select x-model="statsDateFilter" @change="renderDateStatsChart()" class="p-2 border border-gray-300 rounded-lg text-sm">
+                                <option value="daily">รายวัน</option>
+                                <option value="weekly">รายสัปดาห์</option>
+                                <option value="monthly">รายเดือน</option>
+                                <option value="yearly">รายปี</option>
+                            </select>
+                        </div>
+                        <canvas id="dateStatsChart"></canvas>
+                    </div>
+                    <div class="p-4 border rounded-lg col-span-1 lg:col-span-2"><canvas id="statusByGroupChart"></canvas></div>
+                </div>
+            </div>
+
+            <!-- ===== ADMIN PAGE ===== -->
+            <div x-show="currentPage === 'admin'" x-cloak>
+                 <h2 class="text-2xl font-bold mb-4 text-primary">หน้าจัดการสำหรับ Admin</h2>
+                <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                     <div class="bg-white p-5 rounded-xl shadow-sm border-l-4 border-info">
+                        <p class="text-sm font-medium text-gray-500">งานใหม่</p>
+                        <p class="text-2xl font-bold text-gray-800" x-text="stats.new"></p>
+                    </div>
+                    <div class="bg-white p-5 rounded-xl shadow-sm border-l-4 border-warning">
+                        <p class="text-sm font-medium text-gray-500">กำลังดำเนินงาน</p>
+                        <p class="text-2xl font-bold text-gray-800" x-text="stats.inProgress"></p>
+                    </div>
+                    <div class="bg-white p-5 rounded-xl shadow-sm border-l-4 border-green-500">
+                        <p class="text-sm font-medium text-gray-500">ปิดงาน</p>
+                        <p class="text-2xl font-bold text-gray-800" x-text="stats.done"></p>
+                    </div>
+                    <div class="bg-white p-5 rounded-xl shadow-sm border-l-4 border-primary">
+                        <p class="text-sm font-medium text-gray-500">งานทั้งหมด (เดือนนี้)</p>
+                        <p class="text-2xl font-bold text-gray-800" x-text="stats.totalMonth"></p>
+                    </div>
+                </section>
+
+                <div class="bg-white p-4 sm:p-6 rounded-xl shadow-sm">
+                    <div class="mb-4 flex flex-wrap gap-2">
+                        <button @click="showManageDataModal('workGroups', 'กลุ่มงาน')" class="btn-primary py-2 px-4 rounded-lg flex items-center gap-2"><i class="fas fa-users-cog"></i> จัดการกลุ่มงาน</button>
+                        <button @click="showManageDataModal('supervisors', 'ผู้ควบคุม')" class="btn-primary py-2 px-4 rounded-lg flex items-center gap-2"><i class="fas fa-user-tie"></i> จัดการผู้ควบคุม</button>
+                        <button @click="showManageDataModal('teams', 'ทีมงาน')" class="btn-primary py-2 px-4 rounded-lg flex items-center gap-2"><i class="fas fa-users"></i> จัดการทีมงาน</button>
+                        <button @click="showManageDataModal('poleTypes', 'ประเภทเสา')" class="bg-gray-700 text-white hover:bg-gray-800 py-2 px-4 rounded-lg flex items-center gap-2"><i class="fas fa-hard-hat"></i> จัดการประเภทเสา</button>
+                        <button @click="showManageDataModal('wireTypes', 'ประเภทสายไฟ')" class="bg-gray-700 text-white hover:bg-gray-800 py-2 px-4 rounded-lg flex items-center gap-2"><i class="fas fa-bolt"></i> จัดการประเภทสายไฟ</button>
+                        <button @click="showManageDataModal('transformerTypes', 'ประเภทหม้อแปลง')" class="bg-gray-700 text-white hover:bg-gray-800 py-2 px-4 rounded-lg flex items-center gap-2"><i class="fas fa-plug"></i> จัดการประเภทหม้อแปลง</button>
+                    </div>
+                    
+                    <div class="flex flex-wrap gap-4 items-end mb-4 border-t pt-4">
+                        <!-- Admin Filters -->
+                        <div class="flex-grow min-w-[150px]">
+                            <label class="text-sm font-medium text-gray-600">กลุ่มงาน</label>
+                            <input type="text" x-model.debounce.300ms="filters.workGroup" placeholder="ค้นหา..." class="w-full mt-1 p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
+                        </div>
+                        <div class="flex-grow min-w-[150px]">
+                            <label class="text-sm font-medium text-gray-600">WBS</label>
+                            <input type="text" x-model.debounce.300ms="filters.wbs" placeholder="ค้นหา..." class="w-full mt-1 p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
+                        </div>
+                        <div class="flex-grow min-w-[150px]">
+                            <label class="text-sm font-medium text-gray-600">ผู้ควบคุม</label>
+                            <input type="text" x-model.debounce.300ms="filters.supervisor" placeholder="ค้นหา..." class="w-full mt-1 p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
+                        </div>
+                        <button @click="resetFilters()" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium py-2 px-4 rounded-lg mt-1">ล้างค่า</button>
+                    </div>
+                    
+                    <div class="table-container overflow-x-auto">
+                        <table class="w-full text-sm text-left text-gray-600">
+                             <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+                                <tr>
+                                    <th class="p-3">วันที่</th>
+                                    <th class="p-3">WBS</th>
+                                    <th class="p-3">ชื่องาน</th>
+                                    <th class="p-3">ผู้ควบคุม</th>
+                                    <th class="p-3">สถานะ</th>
+                                    <th class="p-3 text-center">จัดการ</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <template x-if="paginatedJobs.length === 0">
+                                    <tr>
+                                        <td colspan="6" class="text-center p-6 text-gray-500">ไม่พบข้อมูล</td>
+                                    </tr>
+                                </template>
+                                <template x-for="job in paginatedJobs" :key="job.id">
+                                    <tr class="bg-white border-b hover:bg-gray-50">
+                                        <td class="p-3" x-text="formatJustDate(job.date)"></td>
+                                        <td class="p-3 font-medium text-gray-800" x-text="job.wbs"></td>
+                                        <td class="p-3" x-text="job.jobName"></td>
+                                        <td class="p-3" x-text="job.supervisor"></td>
+                                        <td class="p-3">
+                                            <span class="status-badge" :class="{
+                                                'status-new': job.status === 'งานใหม่',
+                                                'status-progress': job.status === 'กำลังดำเนินงาน',
+                                                'status-done': job.status === 'ปิดงาน'
+                                            }" x-text="job.status"></span>
+                                        </td>
+                                        <td class="p-3 text-center whitespace-nowrap">
+                                            <button @click="showJobDetails(job)" class="text-blue-500 hover:text-blue-700 mx-1" title="ดูรายละเอียด"><i class="fas fa-eye"></i></button>
+                                            <button @click="editJob(job.id)" class="text-yellow-500 hover:text-yellow-700 mx-1" title="แก้ไข"><i class="fas fa-pencil-alt"></i></button>
+                                            <button @click="updateStatus(job.id, 'กำลังดำเนินงาน')" :disabled="job.status !== 'งานใหม่'" class="text-white bg-orange-500 hover:bg-orange-600 rounded px-2 py-1 mx-1 text-xs disabled:opacity-50 disabled:cursor-not-allowed">เริ่มงาน</button>
+                                            <button @click="updateStatus(job.id, 'ปิดงาน')" :disabled="job.status !== 'กำลังดำเนินงาน'" class="text-white bg-green-500 hover:bg-green-600 rounded px-2 py-1 mx-1 text-xs disabled:opacity-50 disabled:cursor-not-allowed">ปิดงาน</button>
+                                            <button @click="deleteJob(job.id)" class="text-red-500 hover:text-red-700 mx-1" title="ลบ"><i class="fas fa-trash-alt"></i></button>
+                                        </td>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Floating Action Buttons -->
+    <div class="fixed bottom-6 right-6 flex flex-col gap-3 z-50">
+      <template x-if="currentPage === 'home'">
+        <div>
+            <button @click="showAdminLoginModal()" class="bg-gray-700 mb-3 text-white w-14 h-14 rounded-full flex items-center justify-center shadow-lg hover:bg-gray-800 transition-transform hover:scale-110" title="เข้าระบบ Admin">
+                <i class="fas fa-user-shield fa-lg"></i>
+            </button>
+            <button @click="changePage('stats')" class="bg-info mb-3 text-white w-14 h-14 rounded-full flex items-center justify-center shadow-lg hover:bg-blue-600 transition-transform hover:scale-110" title="ดูสถิติ">
+                <i class="fas fa-chart-bar fa-lg"></i>
+            </button>
+            <button @click="addJob()" class="btn-primary text-white w-14 h-14 rounded-full flex items-center justify-center shadow-lg hover:bg-purple-800 transition-transform hover:scale-110" title="เพิ่มข้อมูลคำสั่ง">
+                <i class="fas fa-plus fa-lg"></i>
+            </button>
+        </div>
+      </template>
+    </div>
+
+    <!-- ===== MODALS ===== -->
+    
+    <!-- Add/Edit Job Modal -->
+    <div x-show="showJobModal" x-cloak class="fixed inset-0 modal-backdrop flex items-center justify-center z-[1000] p-4" @click.self="showJobModal = false">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto">
+            <div class="p-6 border-b sticky top-0 bg-white z-10">
+                <h3 class="text-xl font-bold text-primary" x-text="isEditing ? 'แก้ไขข้อมูลงาน' : 'เพิ่มข้อมูลงานใหม่'"></h3>
+            </div>
+            <form @submit.prevent="saveJob" class="p-6 space-y-4">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="md:col-span-1">
+                        <label class="block text-sm font-medium text-gray-700">วันที่ (อัตโนมัติ)</label>
+                        <input type="text" :value="isEditing ? formatJustDate(jobForm.date) : 'จะสร้างอัตโนมัติ'" disabled class="mt-1 block w-full p-2 border bg-gray-100 border-gray-300 rounded-lg">
+                    </div>
+                     <div class="md:col-span-1">
+                        <label class="block text-sm font-medium text-gray-700">เวลา (อัตโนมัติ)</label>
+                        <input type="text" :value="isEditing ? formatTime(jobForm.date) : 'จะสร้างอัตโนมัติ'" disabled class="mt-1 block w-full p-2 border bg-gray-100 border-gray-300 rounded-lg">
+                    </div>
+                    <div class="md:col-span-1">
+                        <label class="block text-sm font-medium text-gray-700">WBS</label>
+                        <input type="text" x-model="jobForm.wbs" required class="mt-1 block w-full p-2 border border-gray-300 rounded-lg shadow-sm focus:ring-primary focus:border-primary">
+                    </div>
+                </div>
+                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">กลุ่มงาน</label>
+                        <select x-model="jobForm.workGroup" required class="mt-1 block w-full p-2 border border-gray-300 rounded-lg shadow-sm focus:ring-primary focus:border-primary">
+                            <option value="">-- เลือกกลุ่มงาน --</option>
+                            <template x-for="group in workGroups" :key="group">
+                                <option :value="group" x-text="group"></option>
+                            </template>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">ชื่องาน</label>
+                        <input type="text" x-model="jobForm.jobName" required class="mt-1 block w-full p-2 border border-gray-300 rounded-lg shadow-sm focus:ring-primary focus:border-primary">
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">ผู้ควบคุม</label>
+                        <select x-model="jobForm.supervisor" required class="mt-1 block w-full p-2 border border-gray-300 rounded-lg shadow-sm focus:ring-primary focus:border-primary">
+                            <option value="">-- เลือกผู้ควบคุม --</option>
+                            <template x-for="sup in supervisors" :key="sup">
+                                <option :value="sup" x-text="sup"></option>
+                            </template>
+                        </select>
+                    </div>
+                     <div>
+                        <label class="block text-sm font-medium text-gray-700">ทีมงาน</label>
+                        <select x-model="jobForm.team" required class="mt-1 block w-full p-2 border border-gray-300 rounded-lg shadow-sm focus:ring-primary focus:border-primary">
+                            <option value="">-- เลือกทีมงาน --</option>
+                            <template x-for="t in teams" :key="t">
+                                <option :value="t" x-text="t"></option>
+                            </template>
+                        </select>
+                    </div>
+                </div>
+                
+                 <div class="pt-4 border-t">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">วันที่สัญญาจ้าง</label>
+                            <input type="date" x-model="jobForm.contractDate" required class="mt-1 block w-full p-2 border border-gray-300 rounded-lg shadow-sm focus:ring-primary focus:border-primary">
+                        </div>
+                        <div>
+                             <label class="block text-sm font-medium text-gray-700">คำนวณวันครบกำหนด</label>
+                            <div class="mt-1 flex gap-2">
+                                <button type="button" @click="calculateDueDate(30)" class="w-full bg-gray-200 hover:bg-gray-300 text-sm py-2 px-3 rounded-lg transition-colors">30 วัน</button>
+                                <button type="button" @click="calculateDueDate(60)" class="w-full bg-gray-200 hover:bg-gray-300 text-sm py-2 px-3 rounded-lg transition-colors">60 วัน</button>
+                                <button type="button" @click="calculateDueDate(90)" class="w-full bg-gray-200 hover:bg-gray-300 text-sm py-2 px-3 rounded-lg transition-colors">90 วัน</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <label class="block text-sm font-medium text-gray-700">วันครบกำหนด</label>
+                        <input type="date" x-model="jobForm.dueDate" required class="mt-1 block w-full p-2 border border-gray-300 rounded-lg shadow-sm focus:ring-primary focus:border-primary">
+                    </div>
+                </div>
+
+                <div class="pt-4 border-t">
+                    <h4 class="text-lg font-semibold text-gray-800 mb-2">รายการอุปกรณ์</h4>
+                    <div class="space-y-3">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-2 items-center">
+                            <select x-model="jobForm.equipment.pole.type" class="p-2 border border-gray-300 rounded-lg">
+                                <option value="">-- เลือกประเภทเสา --</option>
+                                <template x-for="p in poleTypes" :key="p">
+                                    <option :value="p" x-text="p"></option>
+                                </template>
+                            </select>
+                            <input type="number" min="0" x-model.number="jobForm.equipment.pole.quantity" placeholder="จำนวน" class="p-2 border border-gray-300 rounded-lg">
+                            <span class="text-gray-600">ต้น</span>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-2 items-center">
+                            <select x-model="jobForm.equipment.wire.type" class="p-2 border border-gray-300 rounded-lg">
+                                <option value="">-- เลือกประเภทสายไฟ --</option>
+                                <template x-for="w in wireTypes" :key="w">
+                                    <option :value="w" x-text="w"></option>
+                                </template>
+                            </select>
+                            <input type="number" min="0" x-model.number="jobForm.equipment.wire.quantity" placeholder="จำนวน" class="p-2 border border-gray-300 rounded-lg">
+                            <span class="text-gray-600">เมตร</span>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-2 items-center">
+                             <select x-model="jobForm.equipment.transformer.type" class="p-2 border border-gray-300 rounded-lg">
+                                <option value="">-- เลือกประเภทหม้อแปลง --</option>
+                                <template x-for="tr in transformerTypes" :key="tr">
+                                    <option :value="tr" x-text="tr"></option>
+                                </template>
+                            </select>
+                            <input type="number" min="0" x-model.number="jobForm.equipment.transformer.quantity" placeholder="จำนวน" class="p-2 border border-gray-300 rounded-lg">
+                            <span class="text-gray-600">เครื่อง</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="pt-4 border-t">
+                     <label class="block text-sm font-medium text-gray-700">อัพโหลดไฟล์ (ไม่บังคับ)</label>
+                     <div 
+                        @drop.prevent="handleFileDrop($event)" 
+                        @dragover.prevent="$event.target.classList.add('border-primary', 'bg-purple-50')"
+                        @dragleave.prevent="$event.target.classList.remove('border-primary', 'bg-purple-50')"
+                        class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md transition-colors"
+                        onclick="document.getElementById('file-upload').click()">
+                        <div class="space-y-1 text-center">
+                            <i class="fas fa-cloud-upload-alt text-4xl text-gray-400"></i>
+                            <p class="text-sm text-gray-600">ลากและวางไฟล์ที่นี่ หรือ <span class="font-semibold text-primary">คลิกเพื่อเลือกไฟล์</span></p>
+                            <input id="file-upload" name="file-upload" type="file" class="sr-only" multiple @change="handleFileSelect">
+                        </div>
+                     </div>
+                     <div id="file-list" class="mt-2 text-sm text-gray-600 space-y-1">
+                         <template x-for="(file, index) in jobForm.files" :key="index">
+                             <div class="flex justify-between items-center bg-gray-100 p-2 rounded-md">
+                                 <span x-text="file.name" class="truncate"></span>
+                                 <button type="button" @click.stop="removeFile(index)" class="text-red-500 hover:text-red-700 ml-2">&times;</button>
+                             </div>
+                         </template>
+                     </div>
+                </div>
+
+                <div class="pt-5 flex justify-end gap-3">
+                    <button type="button" @click="showJobModal = false" class="bg-gray-200 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-300">ยกเลิก</button>
+                    <button type="submit" class="btn-primary py-2 px-6 rounded-lg">บันทึก</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Admin Login Modal -->
+    <div x-show="showAdminModal" x-cloak class="fixed inset-0 modal-backdrop flex items-center justify-center z-[1000]" @click.self="showAdminModal = false">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-sm p-8">
+            <h3 class="text-2xl font-bold text-center text-primary mb-6">Admin Login</h3>
+            <form @submit.prevent="login">
+                <div class="mb-4">
+                    <label class="block text-gray-700">Username</label>
+                    <input type="text" x-model="adminForm.username" class="w-full mt-1 p-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary" required>
+                </div>
+                 <div class="mb-6">
+                    <label class="block text-gray-700">Password</label>
+                    <input type="password" x-model="adminForm.password" class="w-full mt-1 p-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary" required>
+                </div>
+                <button type="submit" class="w-full btn-primary py-2 rounded-lg text-lg">เข้าสู่ระบบ</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Manage Dropdown Data Modal -->
+    <div x-show="showManageData" x-cloak class="fixed inset-0 modal-backdrop flex items-center justify-center z-[1000]" @click.self="showManageData = false">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-md p-6">
+            <h3 class="text-xl font-bold text-primary mb-4" x-text="`จัดการข้อมูล${manageData.title}`"></h3>
+            <div class="mb-4">
+                <label class="block text-sm font-medium">เพิ่มรายการใหม่</label>
+                <div class="flex gap-2 mt-1">
+                    <input type="text" x-model="manageData.newItem" :placeholder="`เพิ่ม${manageData.title}ใหม่`" @keydown.enter="addManagedItem()" class="flex-grow p-2 border border-gray-300 rounded-lg">
+                    <button @click="addManagedItem()" class="btn-primary px-4 rounded-lg">เพิ่ม</button>
+                </div>
+            </div>
+            <div class="max-h-60 overflow-y-auto border rounded-lg p-2 space-y-2">
+                <template x-if="manageData.items.length === 0">
+                    <p class="text-center text-gray-500">ไม่มีข้อมูล</p>
+                </template>
+                <template x-for="(item, index) in manageData.items" :key="index">
+                    <div class="flex justify-between items-center bg-gray-50 p-2 rounded">
+                        <span x-text="item"></span>
+                        <button @click="removeManagedItem(index)" class="text-red-500 hover:text-red-700"><i class="fas fa-trash-alt"></i></button>
+                    </div>
+                </template>
+            </div>
+             <div class="pt-5 flex justify-end">
+                <button type="button" @click="showManageData = false" class="bg-gray-200 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-300">ปิด</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    document.addEventListener('alpine:init', () => {
+        Alpine.data('app', () => ({
+            // State
+            currentPage: 'home', // home, stats, admin
+            jobs: [],
+            filteredJobs: [],
+            workGroups: [],
+            supervisors: [],
+            teams: [],
+            poleTypes: [],
+            wireTypes: [],
+            transformerTypes: [],
+            
+            // Modals
+            showJobModal: false,
+            isEditing: false,
+            jobForm: {},
+            showAdminModal: false,
+            adminForm: { username: '', password: '' },
+            showManageData: false,
+            manageData: { key: '', title: '', items: [], newItem: '' },
+
+            // Table state
+            itemsPerPage: 10,
+            tableCurrentPage: 1,
+            sortColumn: 'date',
+            sortDirection: 'desc',
+            
+            // Filters
+            filters: {
+                workGroup: '',
+                wbs: '',
+                supervisor: '',
+                team: '',
+                status: '',
+            },
+            stats: { new: 0, inProgress: 0, done: 0, totalMonth: 0 },
+            statsDateFilter: 'daily',
+            charts: {},
+
+            // Getters
+            get paginatedJobs() {
+                const start = (this.tableCurrentPage - 1) * this.itemsPerPage;
+                const end = start + this.itemsPerPage;
+                return this.filteredJobs.slice(start, end);
+            },
+            get totalPages() {
+                if (this.filteredJobs.length === 0) return 1;
+                return Math.ceil(this.filteredJobs.length / this.itemsPerPage);
+            },
+
+            // Methods
+            init() {
+                this.showSpinner();
+                this.loadFromLocalStorage();
+                this.resetJobForm();
+                this.filterJobs();
+                this.calculateStats();
+                this.hideSpinner();
+            },
+            
+            loadFromLocalStorage() {
+                this.jobs = JSON.parse(localStorage.getItem('wbs_jobs')) || [];
+                this.workGroups = JSON.parse(localStorage.getItem('wbs_workGroups')) || ['ก่อสร้าง', 'ปฏิบัติการ', 'หม้อแปลง'];
+                this.supervisors = JSON.parse(localStorage.getItem('wbs_supervisors')) || ['สมชาย ใจดี', 'สมหญิง เก่งกาจ', 'สมศักดิ์ ขยัน'];
+                this.teams = JSON.parse(localStorage.getItem('wbs_teams')) || ['ทีม A', 'ทีม B', 'ทีม C'];
+                this.poleTypes = JSON.parse(localStorage.getItem('wbs_poleTypes')) || ['8 เมตร', '12 เมตร', '22 เมตร'];
+                this.wireTypes = JSON.parse(localStorage.getItem('wbs_wireTypes')) || ['50 ACSR', '185 ACSR', '240 SAC'];
+                this.transformerTypes = JSON.parse(localStorage.getItem('wbs_transformerTypes')) || ['50 kVA', '100 kVA', '250 kVA'];
+            },
+            saveToLocalStorage(key, data) {
+                 localStorage.setItem(`wbs_${key}`, JSON.stringify(data));
+            },
+            saveAllData() {
+                this.saveToLocalStorage('jobs', this.jobs);
+                this.saveToLocalStorage('workGroups', this.workGroups);
+                this.saveToLocalStorage('supervisors', this.supervisors);
+                this.saveToLocalStorage('teams', this.teams);
+                this.saveToLocalStorage('poleTypes', this.poleTypes);
+                this.saveToLocalStorage('wireTypes', this.wireTypes);
+                this.saveToLocalStorage('transformerTypes', this.transformerTypes);
+            },
+
+            showSpinner() { document.getElementById('loading-spinner').style.display = 'flex'; },
+            hideSpinner() { setTimeout(() => document.getElementById('loading-spinner').style.display = 'none', 200); },
+            changePage(page) {
+                this.showSpinner();
+                this.currentPage = page;
+                 this.resetFilters();
+                if (page === 'stats') {
+                    this.$nextTick(() => this.renderAllCharts());
+                }
+                this.hideSpinner();
+            },
+            
+            resetJobForm() {
+                this.jobForm = {
+                    id: null, date: '', workGroup: '', wbs: '', jobName: '', supervisor: '', team: '',
+                    contractDate: '', dueDate: '', status: 'งานใหม่',
+                    equipment: {
+                        pole: { type: '', quantity: null },
+                        wire: { type: '', quantity: null },
+                        transformer: { type: '', quantity: null },
+                    },
+                    files: []
+                };
+            },
+            addJob() {
+                this.isEditing = false;
+                this.resetJobForm();
+                this.showJobModal = true;
+            },
+            editJob(jobId) {
+                this.isEditing = true;
+                const jobToEdit = this.jobs.find(j => j.id === jobId);
+                if (jobToEdit) {
+                    this.jobForm = JSON.parse(JSON.stringify(jobToEdit)); // Deep copy
+                    this.showJobModal = true;
+                }
+            },
+            saveJob() {
+                this.showSpinner();
+                if (!this.jobForm.wbs || !this.jobForm.jobName || !this.jobForm.workGroup || !this.jobForm.supervisor || !this.jobForm.team || !this.jobForm.contractDate || !this.jobForm.dueDate) {
+                    this.showError('กรุณากรอกข้อมูลที่จำเป็นให้ครบถ้วน');
+                    this.hideSpinner();
+                    return;
+                }
+                
+                if (this.isEditing) {
+                    const index = this.jobs.findIndex(j => j.id === this.jobForm.id);
+                    if (index !== -1) this.jobs[index] = this.jobForm;
+                } else {
+                    this.jobForm.id = Date.now().toString();
+                    this.jobForm.date = new Date().toISOString();
+                    this.jobForm.status = 'งานใหม่';
+                    this.jobs.push(this.jobForm);
+                }
+                
+                this.saveAndRefresh();
+                this.showJobModal = false;
+                this.showSuccess('บันทึกข้อมูลสำเร็จ!');
+                this.hideSpinner();
+            },
+            deleteJob(jobId) {
+                Swal.fire({
+                    title: 'ยืนยันการลบ?', text: "คุณจะไม่สามารถกู้คืนข้อมูลนี้ได้!", icon: 'warning',
+                    showCancelButton: true, confirmButtonColor: 'var(--danger-color)', cancelButtonColor: '#BDBDBD',
+                    confirmButtonText: 'ใช่, ลบเลย!', cancelButtonText: 'ยกเลิก'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        this.showSpinner();
+                        this.jobs = this.jobs.filter(j => j.id !== jobId);
+                        this.saveAndRefresh();
+                        this.showSuccess('ลบข้อมูลสำเร็จ!');
+                        this.hideSpinner();
+                    }
+                })
+            },
+            deleteJobWithPassword(jobId) {
+                 Swal.fire({
+                    title: 'กรุณากรอกรหัสผ่าน Admin', input: 'password', inputAttributes: { autocapitalize: 'off' },
+                    showCancelButton: true, confirmButtonText: 'ยืนยัน', cancelButtonText: 'ยกเลิก', showLoaderOnConfirm: true,
+                    preConfirm: (password) => {
+                        if (password === 'admin') { return true; } 
+                        else { Swal.showValidationMessage('รหัสผ่านไม่ถูกต้อง'); }
+                    },
+                    allowOutsideClick: () => !Swal.isLoading()
+                }).then((result) => {
+                    if (result.isConfirmed) this.deleteJob(jobId);
+                })
+            },
+            updateStatus(jobId, newStatus) {
+                const index = this.jobs.findIndex(j => j.id === jobId);
+                if (index !== -1) {
+                    this.jobs[index].status = newStatus;
+                    this.saveAndRefresh();
+                    this.showSuccess(`อัปเดตสถานะเป็น "${newStatus}" เรียบร้อย`);
+                }
+            },
+            saveAndRefresh() {
+                this.saveAllData();
+                this.filterJobs();
+                this.calculateStats();
+            },
+            showJobDetails(job) {
+                let equipmentHtml = `
+                    <h4 class="font-semibold mt-4 mb-2 text-left">รายการอุปกรณ์:</h4>
+                    <ul class="list-disc list-inside text-left text-sm space-y-1">
+                        ${job.equipment.pole?.type && job.equipment.pole?.quantity ? `<li>เสา ${job.equipment.pole.type}: ${job.equipment.pole.quantity} ต้น</li>` : ''}
+                        ${job.equipment.wire?.type && job.equipment.wire?.quantity ? `<li>สาย ${job.equipment.wire.type}: ${job.equipment.wire.quantity} เมตร</li>` : ''}
+                        ${job.equipment.transformer?.type && job.equipment.transformer?.quantity ? `<li>หม้อแปลง ${job.equipment.transformer.type}: ${job.equipment.transformer.quantity} เครื่อง</li>` : ''}
+                    </ul>`;
+                if (!job.equipment.pole?.type && !job.equipment.wire?.type && !job.equipment.transformer?.type) {
+                    equipmentHtml = '<p class="text-sm text-gray-500 text-left mt-2">ไม่มีข้อมูลอุปกรณ์</p>';
+                }
+                let filesHtml = `
+                    <h4 class="font-semibold mt-4 mb-2 text-left">ไฟล์แนบ:</h4>
+                    ${job.files && job.files.length > 0 ? `<ul class="list-disc list-inside text-left text-sm space-y-1">${job.files.map(f => `<li>${f.name}</li>`).join('')}</ul>` : '<p class="text-sm text-gray-500 text-left mt-2">ไม่มีไฟล์แนบ</p>'}`;
+
+                Swal.fire({
+                    title: `<strong>รายละเอียดงาน: ${job.wbs}</strong>`, icon: 'info',
+                    html: `
+                        <div class="text-left text-gray-700 space-y-2 text-sm">
+                            <p><strong>ชื่องาน:</strong> ${job.jobName}</p>
+                            <p><strong>กลุ่มงาน:</strong> ${job.workGroup}</p>
+                            <p><strong>ผู้ควบคุม:</strong> ${job.supervisor}</p>
+                            <p><strong>ทีมงาน:</strong> ${job.team}</p>
+                            <p><strong>วันครบกำหนด:</strong> ${this.formatJustDate(job.dueDate)}</p>
+                            <p><strong>สถานะ:</strong> <span class="status-badge" style="background-color: ${job.status === 'งานใหม่' ? '#E3F2FD; color: #0288D1;' : job.status === 'กำลังดำเนินงาน' ? '#FFF3E0; color: #F57C00;' : '#E8F5E9; color: #388E3C;'}">${job.status}</span></p>
+                        </div>
+                        ${equipmentHtml} ${filesHtml}`,
+                    showCloseButton: true, focusConfirm: false, confirmButtonText: 'ปิด',
+                });
+            },
+
+            filterJobs() {
+                this.tableCurrentPage = 1;
+                let tempJobs = this.jobs.filter(job => 
+                    (!this.filters.workGroup || job.workGroup.toLowerCase().includes(this.filters.workGroup.toLowerCase())) &&
+                    (!this.filters.wbs || job.wbs.toLowerCase().includes(this.filters.wbs.toLowerCase())) &&
+                    (!this.filters.supervisor || job.supervisor.toLowerCase().includes(this.filters.supervisor.toLowerCase())) &&
+                    (!this.filters.team || job.team.toLowerCase().includes(this.filters.team.toLowerCase())) &&
+                    (!this.filters.status || job.status === this.filters.status)
+                );
+                this.filteredJobs = tempJobs;
+                this.sortTable();
+            },
+            sortTable() {
+                this.filteredJobs.sort((a, b) => {
+                    const valA = a[this.sortColumn] || '';
+                    const valB = b[this.sortColumn] || '';
+                    if (valA < valB) return this.sortDirection === 'asc' ? -1 : 1;
+                    if (valA > valB) return this.sortDirection === 'asc' ? 1 : -1;
+                    return 0;
+                });
+            },
+            sortBy(column) {
+                if (this.sortColumn === column) {
+                    this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
+                } else {
+                    this.sortColumn = column;
+                    this.sortDirection = 'asc';
+                }
+                this.sortTable();
+            },
+            resetFilters() {
+                this.filters = { workGroup: '', wbs: '', supervisor: '', team: '', status: '' };
+                this.filterJobs();
+            },
+            applyStatusFilter(status) {
+                this.filters.status = status;
+                this.filterJobs();
+            },
+            
+            nextPage() { if (this.tableCurrentPage < this.totalPages) this.tableCurrentPage++; },
+            prevPage() { if (this.tableCurrentPage > 1) this.tableCurrentPage--; },
+
+            showAdminLoginModal() { this.showAdminModal = true; },
+            login() {
+                this.showSpinner();
+                if (this.adminForm.username === 'admin' && this.adminForm.password === 'admin') {
+                    this.showAdminModal = false;
+                    this.changePage('admin');
+                    this.showSuccess('เข้าสู่ระบบสำเร็จ!');
+                } else {
+                    this.showError('Username หรือ Password ไม่ถูกต้อง!');
+                }
+                this.adminForm = { username: '', password: '' };
+                this.hideSpinner();
+            },
+            logout() { this.changePage('home'); this.showSuccess('ออกจากระบบเรียบร้อย'); },
+            
+            showManageDataModal(key, title) {
+                this.manageData.key = key;
+                this.manageData.title = title;
+                this.manageData.items = [...this[key]];
+                this.manageData.newItem = '';
+                this.showManageData = true;
+            },
+            addManagedItem() {
+                const newItem = this.manageData.newItem.trim();
+                if (newItem && !this.manageData.items.includes(newItem)) {
+                    this[this.manageData.key].push(newItem);
+                    this.manageData.items.push(newItem);
+                    this.manageData.newItem = '';
+                    this.saveToLocalStorage(this.manageData.key, this[this.manageData.key]);
+                }
+            },
+            removeManagedItem(index) {
+                const itemToRemove = this.manageData.items[index];
+                this[this.manageData.key] = this[this.manageData.key].filter(item => item !== itemToRemove);
+                this.manageData.items.splice(index, 1);
+                this.saveToLocalStorage(this.manageData.key, this[this.manageData.key]);
+            },
+
+            calculateStats() {
+                const now = new Date();
+                const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+                this.stats.new = this.jobs.filter(j => j.status === 'งานใหม่').length;
+                this.stats.inProgress = this.jobs.filter(j => j.status === 'กำลังดำเนินงาน').length;
+                this.stats.done = this.jobs.filter(j => j.status === 'ปิดงาน').length;
+                this.stats.totalMonth = this.jobs.filter(j => new Date(j.date) >= firstDayOfMonth).length;
+            },
+
+            renderChart(ctx, type, data, options) {
+                const chartId = ctx.canvas.id;
+                if (this.charts[chartId]) this.charts[chartId].destroy();
+                this.charts[chartId] = new Chart(ctx, { type, data, options });
+            },
+            renderAllCharts() {
+                this.renderWorkGroupChart();
+                this.renderSupervisorChart();
+                this.renderDateStatsChart();
+                this.renderStatusByGroupChart();
+            },
+            renderWorkGroupChart() {
+                const ctx = document.getElementById('workGroupChart')?.getContext('2d');
+                if(!ctx) return;
+                const counts = this.workGroups.map(group => ({ group, count: this.jobs.filter(j => j.workGroup === group).length }));
+                const data = { labels: counts.map(c => c.group), datasets: [{ label: 'จำนวนงาน', data: counts.map(c => c.count), backgroundColor: 'rgba(74, 44, 109, 0.6)', borderColor: 'rgba(74, 44, 109, 1)', borderWidth: 1 }] };
+                this.renderChart(ctx, 'bar', data, { responsive: true, plugins: { title: { display: true, text: 'จำนวนงานตามกลุ่มงาน' } } });
+            },
+            renderSupervisorChart() {
+                const ctx = document.getElementById('supervisorChart')?.getContext('2d');
+                 if(!ctx) return;
+                const counts = this.supervisors.map(sup => ({ sup, count: this.jobs.filter(j => j.supervisor === sup).length }));
+                const data = { labels: counts.map(c => c.sup), datasets: [{ label: 'จำนวนงาน', data: counts.map(c => c.count), backgroundColor: 'rgba(2, 136, 209, 0.6)', borderColor: 'rgba(2, 136, 209, 1)', borderWidth: 1 }] };
+                this.renderChart(ctx, 'bar', data, { responsive: true, plugins: { title: { display: true, text: 'จำนวนงานตามผู้ควบคุม' } } });
+            },
+
+            renderDateStatsChart() {
+                const ctx = document.getElementById('dateStatsChart')?.getContext('2d');
+                if(!ctx) return;
+                
+                const getWeek = (d) => { const date = new Date(d.getTime()); date.setHours(0, 0, 0, 0); date.setDate(date.getDate() + 3 - (date.getDay() + 6) % 7); const week1 = new Date(date.getFullYear(), 0, 4); return 1 + Math.round(((date.getTime() - week1.getTime()) / 86400000 - 3 + (week1.getDay() + 6) % 7) / 7); }
+                const monthNames = ["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."];
+
+                let groupedData = {};
+                this.jobs.forEach(job => {
+                    const d = new Date(job.date);
+                    let key;
+                    if(this.statsDateFilter === 'daily') key = d.toLocaleDateString('th-TH');
+                    else if (this.statsDateFilter === 'weekly') key = `${d.getFullYear()}-W${getWeek(d)}`;
+                    else if (this.statsDateFilter === 'monthly') key = `${d.getFullYear()}-${monthNames[d.getMonth()]}`;
+                    else if (this.statsDateFilter === 'yearly') key = d.getFullYear().toString();
+                    
+                    groupedData[key] = (groupedData[key] || 0) + 1;
+                });
+                
+                const sortedKeys = Object.keys(groupedData).sort();
+                const data = { labels: sortedKeys, datasets: [{ label: 'จำนวนงาน', data: sortedKeys.map(key => groupedData[key]), fill: true, backgroundColor: 'rgba(245, 124, 0, 0.2)', borderColor: 'rgba(245, 124, 0, 1)', tension: 0.1 }] };
+                this.renderChart(ctx, 'line', data, { responsive: true, plugins: { title: { display: true, text: `สถิติงานที่ขอ (${this.statsDateFilter})` } } });
+            },
+
+            renderStatusByGroupChart() {
+                const ctx = document.getElementById('statusByGroupChart')?.getContext('2d');
+                 if(!ctx) return;
+                const statuses = ['งานใหม่', 'กำลังดำเนินงาน', 'ปิดงาน'];
+                const datasets = statuses.map((status, index) => ({
+                    label: status,
+                    data: this.workGroups.map(group => this.jobs.filter(j => j.workGroup === group && j.status === status).length),
+                    backgroundColor: ['rgba(2, 136, 209, 0.7)', 'rgba(245, 124, 0, 0.7)', 'rgba(56, 142, 60, 0.7)'][index]
+                }));
+                const data = { labels: this.workGroups, datasets: datasets };
+                this.renderChart(ctx, 'bar', data, { responsive: true, scales: { x: { stacked: true }, y: { stacked: true } }, plugins: { title: { display: true, text: 'สถานะงาน แยกตามกลุ่มงาน' } } });
+            },
+            
+            handleFileSelect(event) { this.addFiles(event.target.files); event.target.value = null; },
+            handleFileDrop(event) { this.addFiles(event.dataTransfer.files); event.target.classList.remove('border-primary', 'bg-purple-50'); },
+            addFiles(files) {
+                [...files].forEach(file => this.jobForm.files.push({ name: file.name, type: file.type, size: file.size }));
+            },
+            removeFile(index) { this.jobForm.files.splice(index, 1); },
+
+            calculateDueDate(days) {
+                if (!this.jobForm.contractDate) { this.showError('กรุณาเลือกวันที่สัญญาจ้างก่อน'); return; }
+                const startDate = new Date(this.jobForm.contractDate);
+                startDate.setDate(startDate.getDate() + parseInt(days));
+                this.jobForm.dueDate = startDate.toISOString().split('T')[0];
+            },
+
+            formatJustDate(isoString) {
+                if (!isoString) return '-';
+                const date = new Date(isoString);
+                return date.toLocaleDateString('th-TH', { year: 'numeric', month: '2-digit', day: '2-digit' });
+            },
+            formatTime(isoString) {
+                if (!isoString) return '-';
+                return new Date(isoString).toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
+            },
+            showSuccess(message) { Swal.fire({ icon: 'success', title: message, showConfirmButton: false, timer: 1500 }); },
+            showError(message) { Swal.fire({ icon: 'error', title: 'เกิดข้อผิดพลาด', text: message }); }
+        }));
+    });
+    </script>
+</body>
+</html>
