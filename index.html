@@ -270,10 +270,8 @@
                     <div class="p-4 border rounded-lg"><canvas id="supervisorChart"></canvas></div>
                     <div class="p-4 border rounded-lg col-span-1 lg:col-span-2">
                         <div class="flex flex-col sm:flex-row justify-between sm:items-center mb-2 gap-2">
-                            <h3 class="font-semibold">สถิติงานที่ขอ</h3>
+                            <h3 class="font-semibold">จำนวนงานแต่ละเดือน/ปี</h3>
                             <select x-model="statsDateFilter" @change="renderDateStatsChart()" class="p-2 border border-gray-300 rounded-lg text-sm w-full sm:w-auto">
-                                <option value="daily">รายวัน</option>
-                                <option value="weekly">รายสัปดาห์</option>
                                 <option value="monthly">รายเดือน</option>
                                 <option value="yearly">รายปี</option>
                             </select>
@@ -650,7 +648,7 @@
                 status: '',
             },
             stats: { new: 0, inProgress: 0, done: 0, totalMonth: 0 },
-            statsDateFilter: 'daily',
+            statsDateFilter: 'monthly',
             charts: {},
 
             // Getters
@@ -962,42 +960,54 @@
                 const ctx = document.getElementById('dateStatsChart')?.getContext('2d');
                 if(!ctx) return;
                 
-                const getWeek = (d) => { const date = new Date(d.getTime()); date.setHours(0, 0, 0, 0); date.setDate(date.getDate() + 3 - (date.getDay() + 6) % 7); const week1 = new Date(date.getFullYear(), 0, 4); return 1 + Math.round(((date.getTime() - week1.getTime()) / 86400000 - 3 + (week1.getDay() + 6) % 7) / 7); }
                 const monthNames = ["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."];
 
                 let groupedData = {};
                 this.jobs.forEach(job => {
                     const d = new Date(job.date);
                     let key;
-                    if(this.statsDateFilter === 'daily') key = d.toLocaleDateString('th-TH');
-                    else if (this.statsDateFilter === 'weekly') key = `${d.getFullYear()}-W${getWeek(d)}`;
-                    else if (this.statsDateFilter === 'monthly') key = `${d.getFullYear()}-${monthNames[d.getMonth()]}`;
+                    if (this.statsDateFilter === 'monthly') key = `${d.getFullYear()}-${monthNames[d.getMonth()]}`;
                     else if (this.statsDateFilter === 'yearly') key = d.getFullYear().toString();
                     
                     groupedData[key] = (groupedData[key] || 0) + 1;
                 });
                 
-                const sortedKeys = Object.keys(groupedData).sort((a, b) => {
-                    // Custom sort for dates and weeks
-                    if (this.statsDateFilter === 'daily') return new Date(a.split('/').reverse().join('-')) - new Date(b.split('/').reverse().join('-'));
-                    return a.localeCompare(b, undefined, { numeric: true });
-                });
+                const sortedKeys = Object.keys(groupedData).sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
                 
                 const data = { labels: sortedKeys, datasets: [{ label: 'จำนวนงาน', data: sortedKeys.map(key => groupedData[key]), fill: true, backgroundColor: 'rgba(245, 124, 0, 0.2)', borderColor: 'rgba(245, 124, 0, 1)', tension: 0.1 }] };
-                this.renderChart(ctx, 'line', data, { responsive: true, maintainAspectRatio: false, plugins: { title: { display: true, text: `สถิติงานที่ขอ` } } });
+                const title = this.statsDateFilter === 'monthly' ? 'จำนวนงานในแต่ละเดือน' : 'จำนวนงานในแต่ละปี';
+                this.renderChart(ctx, 'line', data, { responsive: true, maintainAspectRatio: false, plugins: { title: { display: true, text: title } } });
             },
 
             renderStatusByGroupChart() {
                 const ctx = document.getElementById('statusByGroupChart')?.getContext('2d');
-                 if(!ctx) return;
-                const statuses = ['งานใหม่', 'กำลังดำเนินงาน', 'ปิดงาน'];
-                const datasets = statuses.map((status, index) => ({
-                    label: status,
-                    data: this.workGroups.map(group => this.jobs.filter(j => j.workGroup === group && j.status === status).length),
-                    backgroundColor: ['rgba(2, 136, 209, 0.7)', 'rgba(245, 124, 0, 0.7)', 'rgba(56, 142, 60, 0.7)'][index]
-                }));
-                const data = { labels: this.workGroups, datasets: datasets };
-                this.renderChart(ctx, 'bar', data, { responsive: true, maintainAspectRatio: false, scales: { x: { stacked: true }, y: { stacked: true } }, plugins: { title: { display: true, text: 'สถานะงาน แยกตามกลุ่มงาน' } } });
+                if (!ctx) return;
+                
+                const closedJobsData = this.workGroups.map(group => 
+                    this.jobs.filter(j => j.workGroup === group && j.status === 'ปิดงาน').length
+                );
+
+                const data = {
+                    labels: this.workGroups,
+                    datasets: [{
+                        label: 'จำนวนงานที่ปิดแล้ว',
+                        data: closedJobsData,
+                        backgroundColor: 'rgba(56, 142, 60, 0.7)', // Success color
+                        borderColor: 'rgba(56, 142, 60, 1)',
+                        borderWidth: 1
+                    }]
+                };
+
+                const options = {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: { y: { beginAtZero: true } },
+                    plugins: {
+                        title: { display: true, text: 'จำนวนงานที่ปิดแล้ว แยกตามกลุ่มงาน' }
+                    }
+                };
+                
+                this.renderChart(ctx, 'bar', data, options);
             },
             
             handleFileSelect(event) { this.addFiles(event.target.files); event.target.value = null; },
@@ -1035,5 +1045,4 @@
     </script>
 </body>
 </html>
-
 
