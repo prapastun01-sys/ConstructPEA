@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ทะเบียนคุมหมายงาน WBS - กฟจ.นครพนม</title>
+    <title>ทะเบียนคุมหมายงาน WBS - กฟภ.นครพนม</title>
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -106,7 +106,7 @@
                     <img src="https://logowik.com/content/uploads/images/pea-provincial-electricity-authority8229.logowik.com.webp" alt="PEA Logo" class="h-10 sm:h-12" onerror="this.style.display='none'">
                     <div>
                         <h1 class="text-lg md:text-2xl font-bold text-primary">ทะเบียนคุมหมายงาน WBS</h1>
-                        <p class="text-xs sm:text-sm text-gray-500">กฟจ.นครพนม แผนกก่อสร้าง</p>
+                        <p class="text-xs sm:text-sm text-gray-500">กฟภ.นครพนม แผนกก่อสร้าง</p>
                     </div>
                 </div>
                 <div class="flex items-center gap-2">
@@ -311,6 +311,7 @@
                         <button @click="showManageDataModal('workGroups', 'กลุ่มงาน')" class="btn-primary py-2 px-3 text-sm rounded-lg flex items-center gap-2 flex-grow sm:flex-grow-0"><i class="fas fa-users-cog"></i> <span class="hidden sm:inline">จัดการกลุ่มงาน</span></button>
                         <button @click="showManageDataModal('supervisors', 'ผู้ควบคุม')" class="btn-primary py-2 px-3 text-sm rounded-lg flex items-center gap-2 flex-grow sm:flex-grow-0"><i class="fas fa-user-tie"></i> <span class="hidden sm:inline">จัดการผู้ควบคุม</span></button>
                         <button @click="showManageDataModal('teams', 'ทีมงาน')" class="btn-primary py-2 px-3 text-sm rounded-lg flex items-center gap-2 flex-grow sm:flex-grow-0"><i class="fas fa-users"></i> <span class="hidden sm:inline">จัดการทีมงาน</span></button>
+                         <button @click="openChangePasswordModal()" class="bg-yellow-500 text-white hover:bg-yellow-600 py-2 px-3 text-sm rounded-lg flex items-center gap-2 flex-grow sm:flex-grow-0"><i class="fas fa-key"></i> <span class="hidden sm:inline">เปลี่ยนรหัสผ่าน</span></button>
                     </div>
                      <div class="mb-4 flex flex-wrap gap-2 border-t pt-4">
                         <button @click="showManageDataModal('poleTypes', 'ประเภทเสา')" class="bg-gray-700 text-white hover:bg-gray-800 py-2 px-3 text-sm rounded-lg flex items-center gap-2 flex-grow sm:flex-grow-0"><i class="fas fa-hard-hat"></i> <span class="hidden sm:inline">จัดการประเภทเสา</span></button>
@@ -609,6 +610,31 @@
             </div>
         </div>
     </div>
+    
+    <!-- Change Password Modal -->
+    <div x-show="showChangePasswordModal" x-cloak class="fixed inset-0 modal-backdrop flex items-center justify-center z-[1000]" @click.self="showChangePasswordModal = false">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-sm p-8 mx-4">
+            <h3 class="text-2xl font-bold text-center text-primary mb-6">เปลี่ยนรหัสผ่าน</h3>
+            <form @submit.prevent="handleChangePassword">
+                <div class="mb-4">
+                    <label class="block text-gray-700">รหัสผ่านเดิม</label>
+                    <input type="password" x-model="changePasswordForm.oldPassword" class="w-full mt-1 p-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary" required>
+                </div>
+                 <div class="mb-4">
+                    <label class="block text-gray-700">รหัสผ่านใหม่</label>
+                    <input type="password" x-model="changePasswordForm.newPassword" class="w-full mt-1 p-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary" required>
+                </div>
+                 <div class="mb-6">
+                    <label class="block text-gray-700">ยืนยันรหัสผ่านใหม่</label>
+                    <input type="password" x-model="changePasswordForm.confirmPassword" class="w-full mt-1 p-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary" required>
+                </div>
+                <div class="pt-5 flex justify-end gap-3">
+                     <button type="button" @click="showChangePasswordModal = false" class="bg-gray-200 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-300">ยกเลิก</button>
+                    <button type="submit" class="btn-primary py-2 px-6 rounded-lg">บันทึก</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
     <script>
     document.addEventListener('alpine:init', () => {
@@ -632,6 +658,11 @@
             adminForm: { username: '', password: '' },
             showManageData: false,
             manageData: { key: '', title: '', items: [], newItem: '' },
+            showChangePasswordModal: false,
+            changePasswordForm: { oldPassword: '', newPassword: '', confirmPassword: ''},
+
+            // Security
+            adminPassword: 'admin',
 
             // Table state
             itemsPerPage: 10,
@@ -669,18 +700,12 @@
                 this.resetJobForm();
                 this.filterJobs();
                 this.calculateStats();
-
-                // Hide columns on mobile for home page table
-                this.$watch('currentPage', (value) => {
-                     if(value === 'home') this.adjustTableColumnsForMobile();
-                });
-                this.adjustTableColumnsForMobile();
+                
+                this.$watch('filters', () => {
+                    this.filterJobs();
+                }, { deep: true });
                 
                 this.hideSpinner();
-            },
-
-            adjustTableColumnsForMobile() {
-                 // This is now handled by Tailwind's responsive classes (e.g., hidden md:table-cell)
             },
             
             loadFromLocalStorage() {
@@ -691,6 +716,8 @@
                 this.poleTypes = JSON.parse(localStorage.getItem('wbs_poleTypes')) || ['8 เมตร', '12 เมตร', '22 เมตร'];
                 this.wireTypes = JSON.parse(localStorage.getItem('wbs_wireTypes')) || ['50 ACSR', '185 ACSR', '240 SAC'];
                 this.transformerTypes = JSON.parse(localStorage.getItem('wbs_transformerTypes')) || ['50 kVA', '100 kVA', '250 kVA'];
+                // WARNING: Storing passwords in localStorage is not secure. This is for demonstration only.
+                this.adminPassword = JSON.parse(localStorage.getItem('wbs_admin_password')) || 'admin';
             },
             saveToLocalStorage(key, data) {
                  localStorage.setItem(`wbs_${key}`, JSON.stringify(data));
@@ -703,6 +730,7 @@
                 this.saveToLocalStorage('poleTypes', this.poleTypes);
                 this.saveToLocalStorage('wireTypes', this.wireTypes);
                 this.saveToLocalStorage('transformerTypes', this.transformerTypes);
+                this.saveToLocalStorage('admin_password', this.adminPassword);
             },
 
             showSpinner() { document.getElementById('loading-spinner').style.display = 'flex'; },
@@ -786,7 +814,7 @@
                     title: 'กรุณากรอกรหัสผ่าน Admin', input: 'password', inputAttributes: { autocapitalize: 'off' },
                     showCancelButton: true, confirmButtonText: 'ยืนยัน', cancelButtonText: 'ยกเลิก', showLoaderOnConfirm: true,
                     preConfirm: (password) => {
-                        if (password === 'admin') { return true; } 
+                        if (password === this.adminPassword) { return true; } 
                         else { Swal.showValidationMessage('รหัสผ่านไม่ถูกต้อง'); }
                     },
                     allowOutsideClick: () => !Swal.isLoading()
@@ -885,7 +913,7 @@
             showAdminLoginModal() { this.showAdminModal = true; },
             login() {
                 this.showSpinner();
-                if (this.adminForm.username === 'admin' && this.adminForm.password === 'admin') {
+                if (this.adminForm.username === 'admin' && this.adminForm.password === this.adminPassword) {
                     this.showAdminModal = false;
                     this.changePage('admin');
                     this.showSuccess('เข้าสู่ระบบสำเร็จ!');
@@ -918,6 +946,30 @@
                 this[this.manageData.key] = this[this.manageData.key].filter(item => item !== itemToRemove);
                 this.manageData.items.splice(index, 1);
                 this.saveToLocalStorage(this.manageData.key, this[this.manageData.key]);
+            },
+
+            openChangePasswordModal() {
+                this.changePasswordForm = { oldPassword: '', newPassword: '', confirmPassword: '' };
+                this.showChangePasswordModal = true;
+            },
+            handleChangePassword() {
+                if(this.changePasswordForm.oldPassword !== this.adminPassword) {
+                    this.showError('รหัสผ่านเดิมไม่ถูกต้อง!');
+                    return;
+                }
+                if(!this.changePasswordForm.newPassword) {
+                    this.showError('กรุณากรอกรหัสผ่านใหม่!');
+                    return;
+                }
+                if(this.changePasswordForm.newPassword !== this.changePasswordForm.confirmPassword) {
+                    this.showError('รหัสผ่านใหม่และการยืนยันไม่ตรงกัน!');
+                    return;
+                }
+                
+                this.adminPassword = this.changePasswordForm.newPassword;
+                this.saveToLocalStorage('admin_password', this.adminPassword);
+                this.showChangePasswordModal = false;
+                this.showSuccess('เปลี่ยนรหัสผ่านสำเร็จ!');
             },
 
             calculateStats() {
