@@ -860,7 +860,7 @@
                             <p><strong>ทีมงาน:</strong> ${job.team}</p>
                             <p><strong>ค่าแรง:</strong> ${this.formatCurrency(job.laborCost)}</p>
                             <p><strong>สถานะค่าแรง:</strong> <span class="status-badge" style="background-color: ${job.laborCostStatus === 'ยังไม่จ่าย' ? '#FECACA; color: #B91C1C;' : '#D1FAE5; color: #047857;'}">${job.laborCostStatus || 'N/A'}</span></p>
-                            <p><strong>วันครบกำหนด:</strong><span class="due-date-red">${this.formatJustDate(job.dueDate)}</span></p>
+                            <p><strong>วันครบกำหนด:</strong> ${this.formatJustDate(job.dueDate)}</p>
                             <p><strong>สถานะ:</strong> <span class="status-badge" style="background-color: ${job.status === 'งานใหม่' ? '#E3F2FD; color: #0288D1;' : job.status === 'กำลังดำเนินงาน' ? '#FFF3E0; color: #F57C00;' : '#E8F5E9; color: #388E3C;'}">${job.status}</span></p>
                         </div>
                         ${equipmentHtml} ${filesHtml}`,
@@ -1097,6 +1097,7 @@
     </script>
 </body>
 </html>
+
 
 
 
