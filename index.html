@@ -851,7 +851,7 @@
                     ${job.files && job.files.length > 0 ? `<ul class="list-disc list-inside text-left text-sm space-y-1">${job.files.map(f => `<li>${f.name}</li>`).join('')}</ul>` : '<p class="text-sm text-gray-500 text-left mt-2">ไม่มีไฟล์แนบ</p>'}`;
 
                 Swal.fire({
-                    title: `<strong>รายละเอียดงาน: ${job.wbs}</strong>`, icon: 'info',
+                    title: `<strong>WBS :  ${job.wbs}</strong>`, icon: 'info',
                     html: `
                         <div class="text-left text-gray-700 space-y-2 text-sm">
                             <p><strong>ชื่องาน:</strong> ${job.jobName}</p>
@@ -1097,4 +1097,5 @@
     </script>
 </body>
 </html>
+
 
